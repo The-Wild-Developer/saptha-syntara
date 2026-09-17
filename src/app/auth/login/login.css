@@ -226,6 +226,50 @@
   animation: login-wave 3s ease-in-out infinite;
 }
 
+@keyframes chart-sheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes chart-pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.chart-bar-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-bar-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 70%
+  );
+  animation: chart-sheen 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.chart-pulse-dot {
+  animation: chart-pulse-dot 2s ease-out infinite;
+}
+
 @keyframes login-splash-progress {
   from {
     transform: scaleX(0);

@@ -32,7 +32,7 @@ const TONE: Record<
     number:
       "bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-600 dark:from-sky-200 dark:via-blue-200 dark:to-cyan-200",
     hint: "bg-sky-500/12 text-sky-700 ring-sky-500/15 dark:bg-sky-400/15 dark:text-sky-200 dark:ring-sky-400/20",
-    watermark: "text-sky-500/15 dark:text-sky-300/12",
+    watermark: "fill-sky-400/25 text-sky-500/55 dark:fill-sky-300/20 dark:text-sky-200/50",
     accent: "from-sky-400 via-blue-500 to-indigo-500",
     spark: "bg-sky-400",
     shape: "stroke-sky-400/40 dark:stroke-sky-300/30",
@@ -47,7 +47,7 @@ const TONE: Record<
     number:
       "bg-gradient-to-br from-emerald-600 via-teal-600 to-green-700 dark:from-emerald-200 dark:via-teal-200 dark:to-green-200",
     hint: "bg-emerald-500/12 text-emerald-700 ring-emerald-500/15 dark:bg-emerald-400/15 dark:text-emerald-200 dark:ring-emerald-400/20",
-    watermark: "text-emerald-500/15 dark:text-emerald-300/12",
+    watermark: "fill-emerald-400/25 text-emerald-500/55 dark:fill-emerald-300/20 dark:text-emerald-200/50",
     accent: "from-emerald-400 via-teal-500 to-green-500",
     spark: "bg-emerald-400",
     shape: "stroke-emerald-400/40 dark:stroke-emerald-300/30",
@@ -62,7 +62,7 @@ const TONE: Record<
     number:
       "bg-gradient-to-br from-amber-600 via-orange-600 to-yellow-700 dark:from-amber-200 dark:via-orange-200 dark:to-yellow-200",
     hint: "bg-amber-500/12 text-amber-800 ring-amber-500/15 dark:bg-amber-400/15 dark:text-amber-200 dark:ring-amber-400/20",
-    watermark: "text-amber-500/15 dark:text-amber-300/12",
+    watermark: "fill-amber-400/30 text-amber-500/55 dark:fill-amber-300/20 dark:text-amber-200/50",
     accent: "from-amber-400 via-orange-500 to-yellow-500",
     spark: "bg-amber-400",
     shape: "stroke-amber-400/40 dark:stroke-amber-300/30",
@@ -77,7 +77,7 @@ const TONE: Record<
     number:
       "bg-gradient-to-br from-rose-600 via-pink-600 to-fuchsia-600 dark:from-rose-200 dark:via-pink-200 dark:to-fuchsia-200",
     hint: "bg-rose-500/12 text-rose-700 ring-rose-500/15 dark:bg-rose-400/15 dark:text-rose-200 dark:ring-rose-400/20",
-    watermark: "text-rose-500/15 dark:text-rose-300/12",
+    watermark: "fill-rose-400/25 text-rose-500/55 dark:fill-rose-300/20 dark:text-rose-200/50",
     accent: "from-rose-400 via-pink-500 to-fuchsia-500",
     spark: "bg-rose-400",
     shape: "stroke-rose-400/40 dark:stroke-rose-300/30",
@@ -92,7 +92,7 @@ const TONE: Record<
     number:
       "bg-gradient-to-br from-violet-600 via-fuchsia-600 to-indigo-600 dark:from-violet-200 dark:via-fuchsia-200 dark:to-indigo-200",
     hint: "bg-violet-500/12 text-violet-700 ring-violet-500/15 dark:bg-violet-400/15 dark:text-violet-200 dark:ring-violet-400/20",
-    watermark: "text-violet-500/15 dark:text-violet-300/12",
+    watermark: "fill-violet-400/25 text-violet-500/55 dark:fill-violet-300/20 dark:text-violet-200/50",
     accent: "from-violet-400 via-fuchsia-500 to-indigo-500",
     spark: "bg-violet-400",
     shape: "stroke-violet-400/40 dark:stroke-violet-300/30",
@@ -107,7 +107,7 @@ const TONE: Record<
     number:
       "bg-gradient-to-br from-cyan-600 via-sky-600 to-teal-600 dark:from-cyan-200 dark:via-sky-200 dark:to-teal-200",
     hint: "bg-cyan-500/12 text-cyan-700 ring-cyan-500/15 dark:bg-cyan-400/15 dark:text-cyan-200 dark:ring-cyan-400/20",
-    watermark: "text-cyan-500/15 dark:text-cyan-300/12",
+    watermark: "fill-cyan-400/25 text-cyan-500/55 dark:fill-cyan-300/20 dark:text-cyan-200/50",
     accent: "from-cyan-400 via-sky-500 to-teal-500",
     spark: "bg-cyan-400",
     shape: "stroke-cyan-400/40 dark:stroke-cyan-300/30",
@@ -242,6 +242,7 @@ export default function StatCard({
         />
         <Icon
           aria-hidden
+          strokeWidth={1.15}
           className={`pointer-events-none absolute -bottom-1.5 -right-1.5 h-16 w-16 rotate-[-12deg] ${style.watermark}`}
         />
         <span

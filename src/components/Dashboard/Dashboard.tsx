@@ -126,7 +126,7 @@ const ATTENTION_SHELL = {
     icon: "bg-gradient-to-br from-rose-400 to-pink-600 text-white",
     badge:
       "bg-rose-500/12 text-rose-700 ring-rose-500/15 dark:bg-rose-400/15 dark:text-rose-200 dark:ring-rose-400/20",
-    watermark: "text-rose-500/15 dark:text-rose-300/12",
+    watermark: "fill-rose-400/25 text-rose-500/55 dark:fill-rose-300/20 dark:text-rose-200/50",
     spark: "bg-rose-500",
     pulse: "border-rose-400",
     subtitle: "Urgent items need a production follow-up",
@@ -140,7 +140,7 @@ const ATTENTION_SHELL = {
     icon: "bg-gradient-to-br from-amber-400 to-orange-600 text-white",
     badge:
       "bg-amber-500/12 text-amber-800 ring-amber-500/15 dark:bg-amber-400/15 dark:text-amber-200 dark:ring-amber-400/20",
-    watermark: "text-amber-500/15 dark:text-amber-300/12",
+    watermark: "fill-amber-400/30 text-amber-500/55 dark:fill-amber-300/20 dark:text-amber-200/50",
     spark: "bg-amber-500",
     pulse: "border-amber-400",
     subtitle: "A few items need a closer look today",
@@ -154,7 +154,7 @@ const ATTENTION_SHELL = {
     icon: "bg-gradient-to-br from-sky-400 to-blue-600 text-white",
     badge:
       "bg-sky-500/12 text-sky-700 ring-sky-500/15 dark:bg-sky-400/15 dark:text-sky-200 dark:ring-sky-400/20",
-    watermark: "text-sky-500/15 dark:text-sky-300/12",
+    watermark: "fill-sky-400/25 text-sky-500/55 dark:fill-sky-300/20 dark:text-sky-200/50",
     spark: "bg-sky-500",
     pulse: "border-sky-400",
     subtitle: "Live notes from orders, lines and people",
@@ -168,7 +168,7 @@ const ATTENTION_SHELL = {
     icon: "bg-gradient-to-br from-emerald-400 to-teal-600 text-white",
     badge:
       "bg-emerald-500/12 text-emerald-700 ring-emerald-500/15 dark:bg-emerald-400/15 dark:text-emerald-200 dark:ring-emerald-400/20",
-    watermark: "text-emerald-500/15 dark:text-emerald-300/12",
+    watermark: "fill-emerald-400/25 text-emerald-500/55 dark:fill-emerald-300/20 dark:text-emerald-200/50",
     spark: "bg-emerald-500",
     pulse: "border-emerald-400",
     subtitle: "Order book and staffing look healthy",
@@ -686,7 +686,7 @@ export default function Dashboard({ userProfile }: DashboardProps) {
         )}
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2">
         <VolumeTrendChart
           labels={analytics.monthlyVolume.labels}
           data={analytics.monthlyVolume.data}
@@ -723,11 +723,13 @@ export default function Dashboard({ userProfile }: DashboardProps) {
             {attentionTone === "ok" ? (
               <ShieldCheck
                 aria-hidden
+                strokeWidth={1.15}
                 className={`pointer-events-none absolute -bottom-3 -right-2 h-24 w-24 rotate-[-12deg] ${attention.watermark}`}
               />
             ) : (
               <BellRing
                 aria-hidden
+                strokeWidth={1.15}
                 className={`pointer-events-none absolute -bottom-3 -right-2 h-24 w-24 rotate-[-12deg] ${attention.watermark}`}
               />
             )}
@@ -841,7 +843,8 @@ export default function Dashboard({ userProfile }: DashboardProps) {
             />
             <CalendarDays
               aria-hidden
-              className="pointer-events-none absolute -bottom-3 -right-2 h-24 w-24 rotate-[-12deg] text-violet-500/15 dark:text-violet-300/12"
+              strokeWidth={1.15}
+              className="pointer-events-none absolute -bottom-3 -right-2 h-24 w-24 rotate-[-12deg] fill-violet-400/25 text-violet-500/55 dark:fill-violet-300/20 dark:text-violet-200/50"
             />
 
             <div className="relative z-10 mb-4 flex items-start justify-between gap-3">
@@ -947,7 +950,8 @@ export default function Dashboard({ userProfile }: DashboardProps) {
           />
           <ClipboardList
             aria-hidden
-            className="pointer-events-none absolute -bottom-3 -right-2 h-28 w-28 rotate-[-12deg] text-cyan-500/15 dark:text-cyan-300/12"
+            strokeWidth={1.15}
+            className="pointer-events-none absolute -bottom-3 -right-2 h-28 w-28 rotate-[-12deg] fill-cyan-400/25 text-cyan-500/55 dark:fill-cyan-300/20 dark:text-cyan-200/50"
           />
 
           <div className="relative z-10 mb-4 flex flex-wrap items-start justify-between gap-3">
@@ -1084,7 +1088,8 @@ export default function Dashboard({ userProfile }: DashboardProps) {
           />
           <Truck
             aria-hidden
-            className="pointer-events-none absolute -bottom-3 -right-2 h-24 w-24 rotate-[-12deg] text-amber-500/15 dark:text-amber-300/12"
+            strokeWidth={1.15}
+            className="pointer-events-none absolute -bottom-3 -right-2 h-24 w-24 rotate-[-12deg] fill-amber-400/30 text-amber-500/55 dark:fill-amber-300/20 dark:text-amber-200/50"
           />
 
           <div className="relative z-10 mb-4 flex items-start justify-between gap-3">
@@ -1231,7 +1236,8 @@ export default function Dashboard({ userProfile }: DashboardProps) {
         />
         <Sparkles
           aria-hidden
-          className="pointer-events-none absolute -bottom-3 -right-2 h-28 w-28 rotate-[-12deg] text-indigo-500/15 dark:text-indigo-300/12"
+          strokeWidth={1.15}
+          className="pointer-events-none absolute -bottom-3 -right-2 h-28 w-28 rotate-[-12deg] fill-indigo-400/25 text-indigo-500/55 dark:fill-indigo-300/20 dark:text-indigo-200/50"
         />
 
         <div className="relative z-10 mb-4 flex flex-wrap items-start justify-between gap-3">

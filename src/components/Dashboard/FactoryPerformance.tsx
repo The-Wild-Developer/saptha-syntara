@@ -93,7 +93,8 @@ export default function FactoryPerformance({
       />
       <Factory
         aria-hidden
-        className="pointer-events-none absolute -bottom-4 -right-3 h-28 w-28 rotate-[-12deg] text-sky-500/10 dark:text-sky-300/10"
+        strokeWidth={1.15}
+        className="pointer-events-none absolute -bottom-4 -right-3 h-28 w-28 rotate-[-12deg] fill-sky-400/25 text-sky-500/55 dark:fill-sky-300/20 dark:text-sky-200/50"
       />
 
       <div className="relative z-10 mb-4 flex flex-wrap items-start justify-between gap-3">
