@@ -145,7 +145,7 @@ export default function PlanningTimeline({
     list.push(holiday);
     holidaysByDate.set(holiday.date, list);
   });
-  const monthHolidays = [...holidaysByDate.values()]
+  const monthHolidays = Array.from(holidaysByDate.values())
     .flat()
     .sort((a, b) => a.date.localeCompare(b.date) || a.name.localeCompare(b.name));
 

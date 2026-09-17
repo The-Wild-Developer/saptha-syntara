@@ -970,13 +970,13 @@ function ProductionPlanningBoard() {
                 <div className="flex flex-wrap gap-1.5">
                   {orderLegends.map((job) => {
                     const segments = jobsByOrderId.get(job.order.id) || [];
-                    const lineCodes = [
-                      ...new Set(
+                    const lineCodes = Array.from(
+                      new Set(
                         segments.map(
                           (segment) => segment.line.code || segment.line.name,
                         ),
                       ),
-                    ].join(", ");
+                    ).join(", ");
                     return (
                       <button
                         key={job.order.id}

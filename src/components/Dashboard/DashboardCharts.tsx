@@ -1,17 +1,10 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import type { ApexOptions } from "apexcharts";
+import { useId, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Factory, TrendingUp, UsersRound, Workflow } from "lucide-react";
-import useColorMode from "@/hooks/useColorMode";
 import type { NamedCount } from "@/hooks/useDashboardData";
 import "@/app/auth/login/login.css";
-
-const ReactApexChart = dynamic(() => import("react-apexcharts"), {
-  ssr: false,
-});
 
 const PURPLE_PALETTE = [
   "#7C3AED",
@@ -92,6 +85,12 @@ const CHART_TONE = {
 
 type ChartTone = keyof typeof CHART_TONE;
 
+function formatCompact(value: number) {
+  return value >= 1000
+    ? `${Math.round(value / 1000)}k`
+    : String(Math.round(value));
+}
+
 function ChartShell({
   title,
   subtitle,
@@ -161,27 +160,12 @@ function ChartShell({
           No data yet. Add records to populate this chart.
         </div>
       ) : (
-        <div className="relative z-10 min-h-[260px] flex-1 overflow-hidden rounded-xl border border-white/80 bg-white/65 p-1 shadow-inner backdrop-blur-sm dark:border-white/10 dark:bg-black/25">
+        <div className="relative z-10 min-h-[260px] flex-1 overflow-hidden rounded-xl border border-white/80 bg-white/65 p-3 shadow-inner backdrop-blur-sm dark:border-white/10 dark:bg-black/25">
           {children}
         </div>
       )}
     </div>
   );
-}
-
-function useChartTheme() {
-  const [colorMode] = useColorMode();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = colorMode === "dark";
-  const foreColor = isDark ? "#AEB7C0" : "#64748B";
-  const gridColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)";
-
-  return { mounted, isDark, foreColor, gridColor };
 }
 
 export function VolumeTrendChart({
@@ -191,80 +175,25 @@ export function VolumeTrendChart({
   labels: string[];
   data: number[];
 }) {
-  const { mounted, isDark, foreColor, gridColor } = useChartTheme();
+  const gradientId = useId().replace(/:/g, "");
+  const fillId = `volume-fill-${gradientId}`;
   const empty = data.every((value) => value === 0);
   const total = data.reduce((sum, value) => sum + value, 0);
-
-  const options: ApexOptions = useMemo(
-    () => ({
-      chart: {
-        type: "area",
-        toolbar: { show: false },
-        fontFamily: "inherit",
-        background: "transparent",
-        sparkline: { enabled: false },
-        dropShadow: {
-          enabled: true,
-          color: "#0EA5E9",
-          top: 8,
-          left: 0,
-          blur: 12,
-          opacity: 0.25,
-        },
-      },
-      colors: ["#0EA5E9"],
-      dataLabels: { enabled: false },
-      markers: {
-        size: 5,
-        colors: ["#fff"],
-        strokeColors: "#0EA5E9",
-        strokeWidth: 3,
-        hover: { size: 7 },
-      },
-      stroke: { curve: "smooth", width: 3 },
-      fill: {
-        type: "gradient",
-        gradient: {
-          shadeIntensity: 1,
-          opacityFrom: isDark ? 0.55 : 0.45,
-          opacityTo: 0.04,
-          stops: [0, 70, 100],
-          colorStops: [
-            { offset: 0, color: "#38BDF8", opacity: isDark ? 0.55 : 0.5 },
-            { offset: 55, color: "#0EA5E9", opacity: isDark ? 0.28 : 0.22 },
-            { offset: 100, color: "#0284C7", opacity: 0.04 },
-          ],
-        },
-      },
-      grid: {
-        borderColor: gridColor,
-        strokeDashArray: 4,
-        padding: { left: 8, right: 8 },
-      },
-      xaxis: {
-        categories: labels,
-        labels: { style: { colors: foreColor, fontWeight: 600 } },
-        axisBorder: { show: false },
-        axisTicks: { show: false },
-      },
-      yaxis: {
-        labels: {
-          style: { colors: foreColor },
-          formatter: (value) =>
-            value >= 1000
-              ? `${Math.round(value / 1000)}k`
-              : String(Math.round(value)),
-        },
-      },
-      tooltip: {
-        theme: isDark ? "dark" : "light",
-        y: {
-          formatter: (value) => `${value.toLocaleString()} pcs`,
-        },
-      },
-    }),
-    [foreColor, gridColor, isDark, labels],
-  );
+  const max = Math.max(...data, 1);
+  const width = 100;
+  const height = 70;
+  const points = data.map((value, index) => {
+    const x = data.length === 1 ? width / 2 : (index / (data.length - 1)) * width;
+    const y = height - (value / max) * height;
+    return { x, y, value, label: labels[index] || "" };
+  });
+  const line = points.map((point) => `${point.x},${point.y}`).join(" ");
+  const area =
+    points.length === 0
+      ? ""
+      : `M${points[0].x} ${height} ${points
+          .map((point) => `L${point.x} ${point.y}`)
+          .join(" ")} L${points[points.length - 1].x} ${height} Z`;
 
   return (
     <ChartShell
@@ -275,89 +204,99 @@ export function VolumeTrendChart({
       icon={TrendingUp}
       badge={empty ? undefined : `${total.toLocaleString()} pcs`}
     >
-      {mounted ? (
-        <ReactApexChart
-          options={options}
-          series={[{ name: "Order qty", data }]}
-          type="area"
-          height={260}
-        />
-      ) : null}
+      <div className="flex h-full min-h-[236px] flex-col">
+        <div className="flex min-h-0 flex-1 gap-2">
+          <div className="flex w-8 shrink-0 flex-col justify-between py-1 text-right text-[10px] font-semibold text-bodydark2">
+            <span>{formatCompact(max)}</span>
+            <span>{formatCompact(max / 2)}</span>
+            <span>0</span>
+          </div>
+          <div className="relative min-w-0 flex-1">
+            <svg
+              viewBox={`0 0 ${width} ${height}`}
+              className="h-full w-full overflow-visible"
+              preserveAspectRatio="none"
+              role="img"
+              aria-label="Order volume trend"
+            >
+              <defs>
+                <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.5" />
+                  <stop offset="55%" stopColor="#0EA5E9" stopOpacity="0.22" />
+                  <stop offset="100%" stopColor="#0284C7" stopOpacity="0.04" />
+                </linearGradient>
+              </defs>
+              {[0.25, 0.5, 0.75].map((ratio) => (
+                <line
+                  key={ratio}
+                  x1="0"
+                  x2={width}
+                  y1={height * ratio}
+                  y2={height * ratio}
+                  className="stroke-stroke dark:stroke-strokedark"
+                  strokeDasharray="2 3"
+                  strokeWidth="0.4"
+                />
+              ))}
+              <path d={area} fill={`url(#${fillId})`} />
+              <polyline
+                points={line}
+                fill="none"
+                stroke="#0EA5E9"
+                strokeWidth="1.6"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+              />
+              {points.map((point, index) => (
+                <circle
+                  key={`${point.label}-${index}`}
+                  cx={point.x}
+                  cy={point.y}
+                  r="1.6"
+                  fill="#fff"
+                  stroke="#0EA5E9"
+                  strokeWidth="0.8"
+                >
+                  <title>
+                    {point.label}: {point.value.toLocaleString()} pcs
+                  </title>
+                </circle>
+              ))}
+            </svg>
+          </div>
+        </div>
+        <div className="ml-10 mt-2 flex justify-between text-[10px] font-semibold text-bodydark2">
+          {labels.map((label) => (
+            <span key={label} className="truncate px-0.5">
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
     </ChartShell>
   );
 }
 
 export function OrderStatusChart({ items }: { items: NamedCount[] }) {
-  const { mounted, isDark, foreColor } = useChartTheme();
   const rows = items.filter((item) => item.value > 0);
   const empty = rows.length === 0;
   const total = rows.reduce((sum, item) => sum + item.value, 0);
-
-  const options: ApexOptions = useMemo(
-    () => ({
-      chart: {
-        type: "donut",
-        fontFamily: "inherit",
-        background: "transparent",
-        animations: { enabled: false },
-      },
-      labels: rows.map((item) => item.name),
-      colors: PURPLE_PALETTE,
-      stroke: {
-        width: 3,
-        colors: [isDark ? "#24303f" : "#ffffff"],
-      },
-      dataLabels: { enabled: false },
-      legend: {
-        position: "bottom",
-        fontWeight: 600,
-        fontSize: "13px",
-        markers: { width: 12, height: 12, radius: 12, offsetX: -3 },
-        labels: { colors: foreColor },
-        itemMargin: { horizontal: 10, vertical: 4 },
-      },
-      plotOptions: {
-        pie: {
-          expandOnClick: false,
-          donut: {
-            size: "68%",
-            labels: {
-              show: true,
-              name: {
-                show: true,
-                fontSize: "11px",
-                fontWeight: 600,
-                color: isDark ? "#C4B5FD" : "#7C3AED",
-                offsetY: -6,
-              },
-              value: {
-                show: true,
-                fontSize: "22px",
-                fontWeight: 800,
-                color: isDark ? "#F5F3FF" : "#5B21B6",
-                offsetY: 2,
-                formatter: (value) => String(value),
-              },
-              total: {
-                show: true,
-                showAlways: true,
-                label: "TOTAL",
-                fontSize: "11px",
-                fontWeight: 700,
-                color: isDark ? "#C4B5FD" : "#7C3AED",
-                formatter: () => total.toLocaleString(),
-              },
-            },
-          },
-        },
-      },
-      tooltip: {
-        theme: "dark",
-        y: { formatter: (value) => `${value} orders` },
-      },
-    }),
-    [foreColor, isDark, rows, total],
-  );
+  const radius = 36;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+  const segments = rows.map((item, index) => {
+    const length = total === 0 ? 0 : (item.value / total) * circumference;
+    const segment = {
+      ...item,
+      color: PURPLE_PALETTE[index % PURPLE_PALETTE.length],
+      dash: length,
+      gap: circumference - length,
+      offset,
+    };
+    offset += length;
+    return segment;
+  });
 
   return (
     <ChartShell
@@ -368,87 +307,71 @@ export function OrderStatusChart({ items }: { items: NamedCount[] }) {
       icon={Workflow}
       badge={empty ? undefined : `${total} live`}
     >
-      {mounted ? (
-        <div className="order-status-donut h-full">
-          <style>{`
-            .order-status-donut .apexcharts-tooltip,
-            .order-status-donut .apexcharts-tooltip-text,
-            .order-status-donut .apexcharts-tooltip-title,
-            .order-status-donut .apexcharts-tooltip-y-group {
-              color: #ffffff !important;
-            }
-          `}</style>
-          <ReactApexChart
-            options={options}
-            series={rows.map((item) => item.value)}
-            type="donut"
-            height={260}
-          />
+      <div className="flex h-full min-h-[236px] flex-col items-center justify-center gap-4 sm:flex-row">
+        <div className="relative h-40 w-40 shrink-0">
+          <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+            <circle
+              cx="50"
+              cy="50"
+              r={radius}
+              fill="none"
+              className="stroke-violet-100 dark:stroke-white/10"
+              strokeWidth="14"
+            />
+            {segments.map((segment) => (
+              <circle
+                key={segment.name}
+                cx="50"
+                cy="50"
+                r={radius}
+                fill="none"
+                stroke={segment.color}
+                strokeWidth="14"
+                strokeDasharray={`${segment.dash} ${segment.gap}`}
+                strokeDashoffset={-segment.offset}
+                strokeLinecap="butt"
+              >
+                <title>
+                  {segment.name}: {segment.value} orders
+                </title>
+              </circle>
+            ))}
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-200">
+              Total
+            </p>
+            <p className="text-2xl font-extrabold text-violet-900 dark:text-violet-50">
+              {total.toLocaleString()}
+            </p>
+          </div>
         </div>
-      ) : null}
+        <ul className="grid w-full max-w-xs grid-cols-1 gap-1.5 text-xs font-semibold text-bodydark2 sm:flex-1">
+          {segments.map((segment) => (
+            <li key={segment.name} className="flex items-center justify-between gap-2">
+              <span className="flex min-w-0 items-center gap-2">
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: segment.color }}
+                />
+                <span className="truncate text-black dark:text-white">
+                  {segment.name}
+                </span>
+              </span>
+              <span>{segment.value}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </ChartShell>
   );
 }
 
 export function DepartmentChart({ items }: { items: NamedCount[] }) {
-  const { mounted, isDark, foreColor, gridColor } = useChartTheme();
   const empty = items.length === 0;
   const rows = items.slice(0, 8);
   const total = rows.reduce((sum, item) => sum + item.value, 0);
-
-  const options: ApexOptions = useMemo(
-    () => ({
-      chart: {
-        type: "bar",
-        toolbar: { show: false },
-        fontFamily: "inherit",
-        background: "transparent",
-      },
-      colors: PALETTE,
-      plotOptions: {
-        bar: {
-          borderRadius: 8,
-          borderRadiusApplication: "end",
-          columnWidth: "46%",
-          distributed: true,
-        },
-      },
-      dataLabels: { enabled: false },
-      grid: {
-        borderColor: gridColor,
-        strokeDashArray: 4,
-      },
-      xaxis: {
-        categories: rows.map((item) => item.name),
-        labels: {
-          style: { colors: foreColor, fontWeight: 600 },
-          rotate: -18,
-        },
-        axisBorder: { show: false },
-        axisTicks: { show: false },
-      },
-      yaxis: {
-        labels: { style: { colors: foreColor } },
-      },
-      legend: { show: false },
-      fill: {
-        type: "gradient",
-        gradient: {
-          shade: "light",
-          type: "vertical",
-          shadeIntensity: 0.35,
-          opacityFrom: 1,
-          opacityTo: 0.75,
-          stops: [0, 100],
-        },
-      },
-      tooltip: {
-        theme: isDark ? "dark" : "light",
-        y: { formatter: (value) => `${value} employees` },
-      },
-    }),
-    [foreColor, gridColor, isDark, rows],
-  );
+  const max = Math.max(...rows.map((item) => item.value), 1);
 
   return (
     <ChartShell
@@ -459,46 +382,31 @@ export function DepartmentChart({ items }: { items: NamedCount[] }) {
       icon={UsersRound}
       badge={empty ? undefined : `${total} people`}
     >
-      {mounted ? (
-        <ReactApexChart
-          options={options}
-          series={[{ name: "Employees", data: rows.map((item) => item.value) }]}
-          type="bar"
-          height={260}
-        />
-      ) : null}
+      <div className="flex h-full min-h-[236px] items-end gap-2 px-1 pb-1 pt-4">
+        {rows.map((item, index) => (
+          <div
+            key={item.name}
+            className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
+            title={`${item.name}: ${item.value} employees`}
+          >
+            <span className="text-[11px] font-bold text-black dark:text-white">
+              {item.value}
+            </span>
+            <div
+              className="w-full max-w-10 rounded-t-lg"
+              style={{
+                height: `${Math.max((item.value / max) * 100, 6)}%`,
+                background: `linear-gradient(180deg, ${PALETTE[index % PALETTE.length]}, ${PALETTE[index % PALETTE.length]}cc)`,
+              }}
+            />
+            <span className="w-full truncate text-center text-[10px] font-semibold text-bodydark2">
+              {item.name}
+            </span>
+          </div>
+        ))}
+      </div>
     </ChartShell>
   );
-}
-
-function roundHorizontalBarEnds(chartEl: HTMLElement, radius = 8) {
-  const paths = chartEl.querySelectorAll<SVGPathElement>(
-    ".apexcharts-bar-series path",
-  );
-
-  paths.forEach((path) => {
-    let box: DOMRect;
-    try {
-      box = path.getBBox();
-    } catch {
-      return;
-    }
-
-    if (box.width < 0.5 || box.height < 0.5) return;
-
-    const r = Math.min(radius, box.height / 2, box.width / 2);
-    if (r <= 0) return;
-
-    const x = box.x;
-    const y = box.y;
-    const w = box.width;
-    const h = box.height;
-
-    path.setAttribute(
-      "d",
-      `M${x} ${y} H${x + w - r} A${r} ${r} 0 0 1 ${x + w} ${y + r} V${y + h - r} A${r} ${r} 0 0 1 ${x + w - r} ${y + h} H${x} Z`,
-    );
-  });
 }
 
 export function LineStaffingChart({
@@ -506,83 +414,12 @@ export function LineStaffingChart({
 }: {
   items: { name: string; assigned: number; planned: number }[];
 }) {
-  const { mounted, isDark, foreColor, gridColor } = useChartTheme();
   const empty = items.length === 0;
   const assigned = items.reduce((sum, item) => sum + item.assigned, 0);
   const planned = items.reduce((sum, item) => sum + item.planned, 0);
-
-  const applyRoundedEnds = (chart: { el?: HTMLElement }) => {
-    if (!chart.el) return;
-    requestAnimationFrame(() => roundHorizontalBarEnds(chart.el, 6));
-  };
-
-  const options: ApexOptions = useMemo(
-    () => ({
-      chart: {
-        type: "bar",
-        stacked: false,
-        toolbar: { show: false },
-        fontFamily: "inherit",
-        background: "transparent",
-        animations: { enabled: false },
-        events: {
-          mounted: applyRoundedEnds,
-          updated: applyRoundedEnds,
-        },
-      },
-      colors: ["#F59E0B", "#8B5CF6"],
-      plotOptions: {
-        bar: {
-          horizontal: true,
-          borderRadius: 0,
-          barHeight: "42%",
-        },
-      },
-      dataLabels: { enabled: false },
-      grid: {
-        borderColor: gridColor,
-        strokeDashArray: 4,
-        xaxis: { lines: { show: true } },
-        yaxis: { lines: { show: false } },
-      },
-      xaxis: {
-        categories: items.map((item) => item.name),
-        labels: {
-          style: { colors: foreColor, fontWeight: 600 },
-        },
-      },
-      yaxis: {
-        labels: {
-          style: { colors: foreColor, fontWeight: 600 },
-          maxWidth: 110,
-        },
-      },
-      legend: {
-        position: "top",
-        horizontalAlign: "left",
-        fontWeight: 700,
-        markers: { width: 10, height: 10, radius: 12, offsetX: -2 },
-        labels: { colors: foreColor },
-      },
-      fill: {
-        type: "gradient",
-        gradient: {
-          shade: "light",
-          type: "horizontal",
-          shadeIntensity: 0.28,
-          opacityFrom: 1,
-          opacityTo: 0.82,
-          stops: [0, 100],
-        },
-      },
-      tooltip: {
-        theme: isDark ? "dark" : "light",
-        shared: true,
-        intersect: false,
-        y: { formatter: (value) => `${value} people` },
-      },
-    }),
-    [foreColor, gridColor, isDark, items],
+  const max = Math.max(
+    ...items.flatMap((item) => [item.assigned, item.planned]),
+    1,
   );
 
   return (
@@ -594,17 +431,51 @@ export function LineStaffingChart({
       icon={Factory}
       badge={empty ? undefined : `${assigned}/${planned}`}
     >
-      {mounted ? (
-        <ReactApexChart
-          options={options}
-          series={[
-            { name: "Assigned", data: items.map((item) => item.assigned) },
-            { name: "Planned", data: items.map((item) => item.planned) },
-          ]}
-          type="bar"
-          height={260}
-        />
-      ) : null}
+      <div className="flex h-full min-h-[236px] flex-col">
+        <div className="mb-3 flex gap-3 text-[11px] font-bold text-bodydark2">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+            Assigned
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-violet-500" />
+            Planned
+          </span>
+        </div>
+        <ul className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+          {items.map((item) => (
+            <li key={item.name}>
+              <p className="mb-1 truncate text-xs font-semibold text-black dark:text-white">
+                {item.name}
+              </p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-amber-100 dark:bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-600"
+                      style={{ width: `${(item.assigned / max) * 100}%` }}
+                    />
+                  </div>
+                  <span className="w-6 text-right text-[10px] font-bold text-amber-700 dark:text-amber-200">
+                    {item.assigned}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-violet-100 dark:bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-violet-400 to-violet-600"
+                      style={{ width: `${(item.planned / max) * 100}%` }}
+                    />
+                  </div>
+                  <span className="w-6 text-right text-[10px] font-bold text-violet-700 dark:text-violet-200">
+                    {item.planned}
+                  </span>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </ChartShell>
   );
 }

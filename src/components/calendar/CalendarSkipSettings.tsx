@@ -82,7 +82,7 @@ export default function CalendarSkipSettings({
 
   const toggleHoliday = (type: HolidayType, checked: boolean) => {
     const skipHolidayTypes = checked
-      ? [...new Set([...value.skipHolidayTypes, type])]
+      ? Array.from(new Set([...value.skipHolidayTypes, type]))
       : value.skipHolidayTypes.filter((item) => item !== type);
     commit({ skipHolidayTypes });
   };
