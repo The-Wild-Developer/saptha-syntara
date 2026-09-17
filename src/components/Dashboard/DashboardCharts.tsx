@@ -255,6 +255,7 @@ export function VolumeTrendChart({
 }) {
   const uid = useId().replace(/:/g, "");
   const fillId = `volume-fill-${uid}`;
+  const strokeId = `volume-stroke-${uid}`;
   const glowId = `volume-glow-${uid}`;
   const [active, setActive] = useState<number | null>(null);
 
@@ -343,9 +344,14 @@ export function VolumeTrendChart({
             >
               <defs>
                 <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2563EB" stopOpacity="0.45" />
-                  <stop offset="55%" stopColor="#2563EB" stopOpacity="0.16" />
-                  <stop offset="100%" stopColor="#2563EB" stopOpacity="0.02" />
+                  <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.55" />
+                  <stop offset="55%" stopColor="#0EA5E9" stopOpacity="0.18" />
+                  <stop offset="100%" stopColor="#0284C7" stopOpacity="0.02" />
+                </linearGradient>
+                <linearGradient id={strokeId} x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#38BDF8" />
+                  <stop offset="55%" stopColor="#0EA5E9" />
+                  <stop offset="100%" stopColor="#2563EB" />
                 </linearGradient>
                 <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
                   <feGaussianBlur stdDeviation="1.4" result="blur" />
@@ -387,8 +393,8 @@ export function VolumeTrendChart({
               <motion.path
                 d={line}
                 fill="none"
-                stroke="#2563EB"
-                strokeWidth="2.4"
+                stroke={`url(#${strokeId})`}
+                strokeWidth="2.1"
                 strokeLinejoin="round"
                 strokeLinecap="round"
                 filter={`url(#${glowId})`}
@@ -403,7 +409,7 @@ export function VolumeTrendChart({
                   x2={hover.x}
                   y1="0"
                   y2={height}
-                  stroke="#2563EB"
+                  stroke="#0EA5E9"
                   strokeWidth="0.45"
                   strokeDasharray="1.4 1.6"
                   opacity="0.85"
@@ -425,10 +431,10 @@ export function VolumeTrendChart({
                   }}
                 >
                   {isPeak ? (
-                    <span className="chart-pulse-dot absolute inset-0 rounded-full bg-blue-500" />
+                    <span className="chart-pulse-dot absolute inset-0 rounded-full bg-sky-400" />
                   ) : null}
                   <span
-                    className={`absolute left-1/2 top-1/2 block -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-blue-600 bg-white shadow-sm transition-all ${
+                    className={`absolute left-1/2 top-1/2 block -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-sky-500 bg-white shadow-sm transition-all ${
                       isActive || isPeak ? "h-3 w-3" : "h-2.5 w-2.5"
                     }`}
                   />
