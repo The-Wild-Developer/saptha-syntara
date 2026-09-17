@@ -2,10 +2,6 @@
   "name": "saptha-syntara",
   "version": "1.3.5",
   "private": true,
-  "overrides": {
-    "apexcharts": "^4.0.0",
-    "react-apexcharts": "^2.1.1"
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
