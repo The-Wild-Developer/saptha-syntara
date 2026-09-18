@@ -50,6 +50,7 @@ type PlanningTimelineProps = {
   selectedDays: string[];
   dragging: boolean;
   draggingOrderId?: string | null;
+  draggingAssignmentId?: string | null;
   draggingOrderQty?: number;
   draggingDayCount?: number;
   onSelectDate: (date: string) => void;
@@ -117,6 +118,7 @@ export default function PlanningTimeline({
   selectedDays,
   dragging,
   draggingOrderId = null,
+  draggingAssignmentId = null,
   draggingOrderQty = 0,
   draggingDayCount = 0,
   onSelectDate,
@@ -159,9 +161,9 @@ export default function PlanningTimeline({
     if (!line) return null;
     const dailyOutput = Number(line.targetOutput) || 0;
     const daysNeeded =
-      draggingOrderQty > 0
-        ? workingDaysNeeded(draggingOrderQty, dailyOutput)
-        : draggingDayCount;
+      draggingDayCount > 0
+        ? draggingDayCount
+        : workingDaysNeeded(draggingOrderQty, dailyOutput);
     const hoverDate = dragOver.date;
     if (daysNeeded <= 0) {
       return {
@@ -183,7 +185,8 @@ export default function PlanningTimeline({
         line.id,
         dates,
         jobs,
-        draggingOrderId || undefined,
+        draggingDayCount > 0 ? undefined : draggingOrderId || undefined,
+        draggingAssignmentId || undefined,
       ),
     };
   }, [
@@ -195,6 +198,7 @@ export default function PlanningTimeline({
     skipSettings,
     jobs,
     draggingOrderId,
+    draggingAssignmentId,
   ]);
 
   return (

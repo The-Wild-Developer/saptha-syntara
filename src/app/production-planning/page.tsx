@@ -54,6 +54,7 @@ import {
   colorForOrder,
   firstWorkingDate,
   jobOverlapsLine,
+  jobsWithoutMovedSegment,
   nextQueueStart,
   qtyOnDate,
   workingDaysNeeded,
@@ -117,6 +118,9 @@ function ProductionPlanningBoard() {
   const [orderQuery, setOrderQuery] = useState("");
   const [draggingOrderId, setDraggingOrderId] = useState<string | null>(null);
   const [draggingDays, setDraggingDays] = useState(false);
+  const [draggingAssignmentId, setDraggingAssignmentId] = useState<string | null>(
+    null,
+  );
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(
     null,
   );
@@ -301,6 +305,7 @@ function ProductionPlanningBoard() {
   const stopDrag = () => {
     setDraggingOrderId(null);
     setDraggingDays(false);
+    setDraggingAssignmentId(null);
     setDragOverLineId(null);
   };
 
@@ -354,7 +359,8 @@ function ProductionPlanningBoard() {
     event.dataTransfer.setData("text/plain", `days:${JSON.stringify(payload)}`);
     event.dataTransfer.effectAllowed = "move";
     setDraggingDays(true);
-    setDraggingOrderId(null);
+    setDraggingAssignmentId(job.assignment.id);
+    setDraggingOrderId(job.order.id);
     setSelectedOrderId(job.order.id);
     setSelectedLineId(job.line.id);
   };
@@ -373,13 +379,7 @@ function ProductionPlanningBoard() {
       showErrorAlert("Missing record", "The order or production line was not found.");
       return;
     }
-    if (sourceJob.line.id === destLineId) {
-      showErrorAlert(
-        "Same production line",
-        "Drop the selected days onto a different production line.",
-      );
-      return;
-    }
+    const sameLine = sourceJob.line.id === destLineId;
     const destOutput = Number(destLine.targetOutput) || 0;
     if (destOutput <= 0) {
       showErrorAlert(
@@ -394,16 +394,24 @@ function ProductionPlanningBoard() {
       showErrorAlert("No days selected", "Select order days on the calendar first.");
       return;
     }
+    const remainingDates = sourceJob.dates.filter((date) => date < cut);
     const movedQty = dates.reduce(
       (total, date) => total + qtyOnDate(sourceJob, date),
       0,
     );
     if (movedQty <= 0) return;
 
+    const remainingQty = sourceJob.qty - movedQty;
+    const occupancyJobs = jobsWithoutMovedSegment(
+      jobs,
+      sourceJob.assignment.id,
+      remainingDates,
+      remainingQty,
+    );
     const daysNeeded = workingDaysNeeded(movedQty, destOutput);
     const startDate =
       mode === "queue"
-        ? nextQueueStart(destLineId, jobs, preferredStart, undefined, skipSettings)
+        ? nextQueueStart(destLineId, occupancyJobs, preferredStart, undefined, skipSettings)
         : firstWorkingDate(preferredStart, skipSettings);
     const destDates = buildWorkingDates(startDate, daysNeeded, skipSettings);
     if (destDates.length === 0) {
@@ -413,44 +421,63 @@ function ProductionPlanningBoard() {
       );
       return;
     }
-    if (mode === "date" && jobOverlapsLine(destLineId, destDates, jobs)) {
+    if (sameLine && destDates[0] === dates[0]) {
+      return;
+    }
+    if (mode === "date" && jobOverlapsLine(destLineId, destDates, occupancyJobs)) {
       showErrorAlert(
         "Line already booked",
-        "That production line already has an order on those days. Drop onto the line name to queue after its current orders.",
+        sameLine
+          ? "That production line already has an order on those days. Drop onto a free start date, or onto the line name to queue after its current orders."
+          : "That production line already has an order on those days. Drop onto the line name to queue after its current orders.",
       );
       return;
     }
 
-    const remainingQty = sourceJob.qty - movedQty;
     const result = await fireAlert({
       icon: "question",
-      title: "Move days to another line?",
-      text: `${sourceJob.order.orderNo}: ${formatPcs(movedQty)} · ${dates.length} day${dates.length === 1 ? "" : "s"}\n${sourceJob.line.name} → ${destLine.name}\n${destDates.length} working day${destDates.length === 1 ? "" : "s"} · ${destDates[0]} → ${destDates[destDates.length - 1]}`,
+      title: sameLine
+        ? remainingQty <= 0
+          ? "Move this order?"
+          : "Move days on this line?"
+        : "Move days to another line?",
+      text: sameLine
+        ? `${sourceJob.order.orderNo}: ${formatPcs(movedQty)} · ${dates.length} day${dates.length === 1 ? "" : "s"}\n${destLine.name}\n${destDates.length} working day${destDates.length === 1 ? "" : "s"} · ${destDates[0]} → ${destDates[destDates.length - 1]}`
+        : `${sourceJob.order.orderNo}: ${formatPcs(movedQty)} · ${dates.length} day${dates.length === 1 ? "" : "s"}\n${sourceJob.line.name} → ${destLine.name}\n${destDates.length} working day${destDates.length === 1 ? "" : "s"} · ${destDates[0]} → ${destDates[destDates.length - 1]}`,
       showCancelButton: true,
-      confirmButtonText: "Move days",
+      confirmButtonText:
+        sameLine && remainingQty <= 0 ? "Move order" : "Move days",
       cancelButtonText: "Cancel",
     });
     if (!result.isConfirmed) return;
 
-    if (remainingQty <= 0) {
-      productionPlanStore.remove(sourceJob.assignment.id);
+    if (sameLine && remainingQty <= 0) {
+      productionPlanStore.update(sourceJob.assignment.id, {
+        startDate: destDates[0],
+      });
     } else {
-      productionPlanStore.update(sourceJob.assignment.id, { qty: remainingQty });
+      if (remainingQty <= 0) {
+        productionPlanStore.remove(sourceJob.assignment.id);
+      } else {
+        productionPlanStore.update(sourceJob.assignment.id, { qty: remainingQty });
+      }
+      productionPlanStore.addSegment({
+        orderId: sourceJob.order.id,
+        lineId: destLine.id,
+        startDate: destDates[0],
+        qty: movedQty,
+      });
     }
-    productionPlanStore.addSegment({
-      orderId: sourceJob.order.id,
-      lineId: destLine.id,
-      startDate: destDates[0],
-      qty: movedQty,
-    });
     refreshPlan();
     clearDaySelection();
     setSelectedLineId(destLine.id);
     setSelectedOrderId(sourceJob.order.id);
     jumpToDate(destDates[0]);
     showSuccessAlert(
-      "Days moved",
-      `${sourceJob.order.orderNo} now also runs on ${destLine.name}, keeping the same legend colour.`,
+      sameLine ? "Order moved" : "Days moved",
+      sameLine
+        ? `${sourceJob.order.orderNo} now runs ${destDates[0]} → ${destDates[destDates.length - 1]} on ${destLine.name}.`
+        : `${sourceJob.order.orderNo} now also runs on ${destLine.name}, keeping the same legend colour.`,
     );
   };
 
@@ -807,7 +834,7 @@ function ProductionPlanningBoard() {
               </h2>
               <p className="text-xs text-bodydark2">
                 {draggingOrderId || draggingDays
-                  ? "Drop on a date box to start from that day, or on a line name to queue"
+                  ? "Drop on a date box to start from that day, including on the same line, or on a line name to queue"
                   : `${config.name} · selected ${selectedDate}${
                       selectedLineId
                         ? ` · ${lines.find((line) => line.id === selectedLineId)?.name || "line"}`
@@ -904,8 +931,9 @@ function ProductionPlanningBoard() {
               selectedDays={selectedDays}
               dragging={Boolean(draggingOrderId || draggingDays)}
               draggingOrderId={draggingOrderId}
+              draggingAssignmentId={draggingAssignmentId}
               draggingOrderQty={
-                draggingOrderId
+                draggingOrderId && !draggingDays
                   ? Number(
                       orders.find((order) => order.id === draggingOrderId)
                         ?.orderQty,
@@ -947,14 +975,15 @@ function ProductionPlanningBoard() {
               <p className="rounded-xl border border-amber-300/70 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-500/30 dark:bg-amber-900/20 dark:text-amber-200">
                 An order runs past its delivery date. Click the first extra day
                 — that day and every later box will be selected. Drag them onto
-                another production line. The order keeps the same legend colour.
+                a later date on this line, or onto another production line. The
+                order keeps the same legend colour.
               </p>
             ) : null}
             {selectedDays.length > 0 ? (
               <p className="rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-primary">
                 {selectedDays.length} day{selectedDays.length === 1 ? "" : "s"}{" "}
-                from {selectedDays[0]} onward selected. Drag onto another line
-                to move this tail of the order.
+                from {selectedDays[0]} onward selected. Drag onto a new date on
+                this line, or onto another line to move this tail of the order.
               </p>
             ) : null}
             <div>

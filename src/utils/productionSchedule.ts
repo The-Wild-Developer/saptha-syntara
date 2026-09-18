@@ -397,13 +397,37 @@ export function jobOverlapsLine(
   dates: string[],
   jobs: PlannedJob[],
   excludeOrderId?: string,
+  excludeAssignmentId?: string,
 ) {
   return jobs.some(
     (job) =>
       job.line.id === lineId &&
       job.order.id !== excludeOrderId &&
+      job.assignment.id !== excludeAssignmentId &&
       datesOverlap(job.dates, dates),
   );
+}
+
+export function jobsWithoutMovedSegment(
+  jobs: PlannedJob[],
+  assignmentId: string,
+  remainingDates: string[],
+  remainingQty: number,
+): PlannedJob[] {
+  return jobs.flatMap((job) => {
+    if (job.assignment.id !== assignmentId) return [job];
+    if (remainingQty <= 0 || remainingDates.length === 0) return [];
+    return [
+      {
+        ...job,
+        qty: remainingQty,
+        dates: remainingDates,
+        startDate: remainingDates[0],
+        endDate: remainingDates[remainingDates.length - 1],
+        workingDays: remainingDates.length,
+      },
+    ];
+  });
 }
 
 export function qtyOnDate(job: PlannedJob, date: string) {
