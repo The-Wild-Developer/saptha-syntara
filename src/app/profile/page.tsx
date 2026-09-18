@@ -36,10 +36,10 @@ function Profile() {
 
   return (
     <DefaultLayout>
-      <div className="mx-auto w-242.5">
+      <div className="mx-auto w-full min-w-0 max-w-242.5">
         <Breadcrumb pageName="Profile" />
-        <div className="overflow-hidden rounded-3xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="relative z-20 h-35 bg-[#1E40AF] md:h-65">
+        <div className="overflow-hidden rounded-2xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:rounded-3xl">
+          <div className="relative z-20 h-28 overflow-hidden bg-[#1E40AF] sm:h-35 md:h-65">
             <svg
               preserveAspectRatio="xMidYMid slice"
               viewBox="10 10 80 80"
@@ -66,41 +66,27 @@ function Profile() {
                 d="M102,67.1c-9.6-6.1-22-3.1-29.5,2-15.4,10.7-19.6,37.5-7.6,47.8s35.9,3.9,44.5-12.5C115.5,92.6,113.9,74.6,102,67.1Z"
               />
             </svg>
-
-            <div className="links absolute left-4 top-4 z-30">
-              <a
-                href="https://dev.to/uuuuuulala/making-background-blob-animation-in-just-15kb-step-by-step-guide-2482"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  className="icon"
-                  src="https://ksenia-k.com/img/icons/link.svg"
-                  alt="Link Icon"
-                />
-              </a>
-            </div>
           </div>
 
-          <div className="px-4 pb-6 text-center lg:pb-8 xl:pb-11.5">
-            <div className="relative z-30 mx-auto -mt-20 flex items-center justify-center md:-mt-22">
-              <div className="rounded-full bg-white/20 p-2 backdrop-blur">
-                <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-gradient-to-tr from-primary to-hover sm:h-40 sm:w-40 md:h-40 md:w-40">
-                  <User className="h-16 w-16 text-white sm:h-22 sm:w-22 md:h-22 md:w-22" />
+          <div className="px-3 pb-6 text-center sm:px-4 lg:pb-8 xl:pb-11.5">
+            <div className="relative z-30 mx-auto -mt-12 flex items-center justify-center sm:-mt-20 md:-mt-22">
+              <div className="rounded-full bg-white/20 p-1.5 backdrop-blur sm:p-2">
+                <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-tr from-primary to-hover sm:h-32 sm:w-32 md:h-40 md:w-40">
+                  <User className="h-12 w-12 text-white sm:h-16 sm:w-16 md:h-22 md:w-22" />
                 </div>
               </div>
             </div>
-            <div className="mt-4">
-              <h3 className="mb-1.5 text-2xl font-semibold text-black dark:text-white">
+            <div className="mt-3 sm:mt-4">
+              <h3 className="mb-1.5 break-words px-1 text-xl font-semibold text-black dark:text-white sm:text-2xl">
                 {userProfile.firstName} {userProfile.lastName}
               </h3>
-              <p className="mb-4 font-medium">
+              <p className="mb-4 px-2 text-sm font-medium sm:text-base">
                 {userProfile.userRole.description}
               </p>
 
               {userProfile.status === "ACT" ||
               userProfile.status === "ACTIVE" ? (
-                <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-1.5 text-sm font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
+                <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300 sm:px-4 sm:py-1.5 sm:text-sm">
                   <span className="relative flex h-2.5 w-2.5">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75"></span>
                     <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-600 dark:bg-green-400"></span>
@@ -108,13 +94,13 @@ function Profile() {
                   {userProfile.statusDescription || "Active"}
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-2 rounded-full bg-red-100 px-4 py-1.5 text-sm font-medium text-red-800 dark:bg-red-900 dark:text-red-300">
+                <span className="inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300 sm:px-4 sm:py-1.5 sm:text-sm">
                   <span className="h-2.5 w-2.5 rounded-full bg-red-500"></span>
                   {userProfile.status}
                 </span>
               )}
 
-              <div className="mx-auto mt-6 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="mx-auto mt-5 grid w-full max-w-3xl grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-2">
                 {[
                   {
                     label: "Last Logged Date",
@@ -129,16 +115,16 @@ function Profile() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="flex items-center gap-4 rounded-2xl border border-stroke bg-gray-50/80 p-4 text-left shadow-sm dark:border-strokedark dark:bg-gray-800/60"
+                    className="flex min-w-0 items-center gap-3 rounded-2xl border border-stroke bg-gray-50/80 p-3 text-left shadow-sm dark:border-strokedark dark:bg-gray-800/60 sm:gap-4 sm:p-4"
                   >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <item.icon className="h-6 w-6" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:h-12 sm:w-12">
+                      <item.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 sm:text-[11px]">
                         {item.label}
                       </p>
-                      <p className="mt-1 break-words text-[15px] font-semibold text-black dark:text-white">
+                      <p className="mt-1 break-all text-sm font-semibold text-black dark:text-white sm:text-[15px]">
                         {item.value}
                       </p>
                     </div>
@@ -146,13 +132,13 @@ function Profile() {
                 ))}
               </div>
 
-              <div className="mx-auto mt-8 w-full max-w-3xl">
-                <div className="mb-5 flex items-center gap-3">
-                  <div className="h-px flex-1 bg-stroke dark:bg-strokedark" />
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
+              <div className="mx-auto mt-6 w-full max-w-3xl sm:mt-8">
+                <div className="mb-4 flex items-center gap-2 sm:mb-5 sm:gap-3">
+                  <div className="h-px min-w-0 flex-1 bg-stroke dark:bg-strokedark" />
+                  <p className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400 sm:text-[11px] sm:tracking-[0.2em]">
                     Personal Details
                   </p>
-                  <div className="h-px flex-1 bg-stroke dark:bg-strokedark" />
+                  <div className="h-px min-w-0 flex-1 bg-stroke dark:bg-strokedark" />
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -180,16 +166,16 @@ function Profile() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="flex items-center gap-4 rounded-2xl border border-stroke bg-gray-50/80 p-4 text-left shadow-sm dark:border-strokedark dark:bg-gray-800/60"
+                      className="flex min-w-0 items-center gap-3 rounded-2xl border border-stroke bg-gray-50/80 p-3 text-left shadow-sm dark:border-strokedark dark:bg-gray-800/60 sm:gap-4 sm:p-4"
                     >
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <item.icon className="h-6 w-6" />
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:h-12 sm:w-12">
+                        <item.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400">
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 sm:text-[11px]">
                           {item.label}
                         </p>
-                        <p className="mt-1 break-words text-[15px] font-semibold text-black dark:text-white">
+                        <p className="mt-1 break-all text-sm font-semibold text-black dark:text-white sm:text-[15px]">
                           {item.value}
                         </p>
                       </div>
