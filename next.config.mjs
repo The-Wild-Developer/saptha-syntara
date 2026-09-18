@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   distDir: "build",
-  basePath: "/",
+  basePath: "/saptha-syntara",
   output: "export",
 };
 
