@@ -12,7 +12,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <AuthPageShell subtitle="Enter a new password to access your account">
+        <AuthPageShell>
           <div className="login-glass login-card rounded-2xl border border-white/60 shadow-xl shadow-blue-100/50 sm:rounded-3xl">
             <p className="text-center text-sm text-blue-600">Loading...</p>
           </div>
@@ -73,7 +73,7 @@ function ResetPassword() {
   };
 
   return (
-    <AuthPageShell subtitle="Enter a new password to access your account">
+    <AuthPageShell>
       <div
         className="login-glass login-card-hover login-animate-slide-up login-card rounded-2xl border border-white/60 shadow-xl shadow-blue-100/50 sm:rounded-3xl"
         style={{ opacity: 0, animationDelay: "0.2s" }}
@@ -83,7 +83,7 @@ function ResetPassword() {
           style={{ opacity: 0 }}
         >
           <h1
-            className="login-animate-gradient login-card-title bg-gradient-to-r from-hover via-primary to-hover bg-clip-text font-bold text-transparent"
+            className="login-animate-gradient login-card-title bg-gradient-to-r from-hover via-primary to-hover bg-clip-text font-extrabold text-transparent"
             style={{ backgroundSize: "200% auto" }}
           >
             Reset Password

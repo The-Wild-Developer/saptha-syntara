@@ -77,21 +77,24 @@ export default function Login() {
   };
 
   return (
-    <AuthPageShell subtitle="Sign in to continue to Saptha Syntara">
+    <AuthPageShell>
       <div
         className="login-glass login-card-hover login-animate-slide-up login-card rounded-2xl border border-white/60 shadow-xl shadow-blue-100/50 sm:rounded-3xl"
         style={{ opacity: 0, animationDelay: "0.2s" }}
       >
-
         <div
-          className="login-animate-fade-in login-delay-400 login-divider flex items-center gap-3 sm:gap-4"
+          className="login-animate-fade-in login-delay-400 mb-5 text-center sm:mb-6"
           style={{ opacity: 0 }}
         >
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-200 to-transparent" />
-          <span className="shrink-0 text-[10px] font-medium uppercase tracking-wider text-blue-400 xsm:text-xs">
-            continue with your account
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-blue-200 to-transparent" />
+          <h1
+            className="login-animate-gradient login-card-title bg-gradient-to-r from-hover via-primary to-hover bg-clip-text font-extrabold text-transparent"
+            style={{ backgroundSize: "200% auto" }}
+          >
+            Sign in
+          </h1>
+          <p className="login-card-copy text-blue-600/70">
+            Enter your username and password to access your account.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">

@@ -3,12 +3,10 @@ import Footer from "@/components/general/footer";
 import "@/app/auth/login/login.css";
 
 type AuthPageShellProps = {
-  subtitle: string;
   children: ReactNode;
 };
 
 export default function AuthPageShell({
-  subtitle,
   children,
 }: AuthPageShellProps) {
   return (
@@ -151,12 +149,6 @@ export default function AuthPageShell({
               alt="Saptha Syntara"
               className="login-logo mx-auto object-contain"
             />
-            <p
-              className="login-animate-fade-in login-delay-300 login-subtitle text-hover/70"
-              style={{ opacity: 0 }}
-            >
-              {subtitle}
-            </p>
           </div>
           {children}
         </div>

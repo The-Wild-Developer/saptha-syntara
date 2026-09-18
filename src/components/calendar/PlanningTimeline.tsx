@@ -274,7 +274,7 @@ export default function PlanningTimeline({
 
         {lines.length === 0 ? (
           <p className="px-3 py-6 text-center text-xs text-bodydark2">
-            No production lines to plot.
+            No production lines for this company.
           </p>
         ) : (
           lines.map((line, index) => {

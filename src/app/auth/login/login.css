@@ -416,18 +416,14 @@ body:has(.login-page) {
   max-width: min(16rem, 85%);
 }
 
-.login-subtitle {
-  margin-top: clamp(0.25rem, 0.8vh, 0.5rem);
-  font-size: clamp(0.75rem, 1.4vh + 0.4rem, 0.875rem);
-}
-
 .login-card {
   padding: clamp(1rem, 2.6vh, 2rem) clamp(1rem, 3vw, 2rem);
 }
 
 .login-card-title {
-  font-size: clamp(1.15rem, 2.2vh + 0.5rem, 1.5rem);
-  line-height: 1.25;
+  font-size: clamp(1.5rem, 3vw + 0.5rem, 2.15rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .login-card-copy {

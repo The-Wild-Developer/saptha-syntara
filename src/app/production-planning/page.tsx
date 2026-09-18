@@ -8,14 +8,18 @@ import {
   type DragEvent,
   type ReactNode,
 } from "react";
+import Link from "next/link";
 import {
+  Building2,
   CalendarDays,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
   Factory,
   GripVertical,
   LayoutGrid,
+  Network,
   Search,
   X,
 } from "lucide-react";
@@ -39,6 +43,7 @@ import {
   HOLIDAY_TYPES,
   calendarStore,
   companyStore,
+  groupStore,
   orderBookStore,
   planningSkipStore,
   productionLineStore,
@@ -62,6 +67,8 @@ import {
 } from "@/utils/productionSchedule";
 
 const ORDER_DRAG_TYPE = "text/order-id";
+const PLANNING_COMPANY_KEY = "ss_planning_company_id";
+const PLANNING_GROUP_KEY = "ss_planning_group_id";
 
 function readDaysPayload(event: DragEvent): DayMovePayload | null {
   const raw =
@@ -131,6 +138,14 @@ function ProductionPlanningBoard() {
   );
   const [calendarView, setCalendarView] = useState<"tiles" | "month">("tiles");
   const [skipSettings, setSkipSettings] = useState(DEFAULT_PLANNING_SKIP);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(PLANNING_COMPANY_KEY) || "";
+  });
+  const [selectedGroupId, setSelectedGroupId] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(PLANNING_GROUP_KEY) || "";
+  });
   const skipLineClickRef = useRef(false);
 
   const [lines, setLines] = useState<ReturnType<typeof productionLineStore.getAll>>(
@@ -142,6 +157,9 @@ function ProductionPlanningBoard() {
   const [companies, setCompanies] = useState<
     ReturnType<typeof companyStore.getAll>
   >([]);
+  const [groups, setGroups] = useState<ReturnType<typeof groupStore.getAll>>(
+    [],
+  );
   const [sections, setSections] = useState<
     ReturnType<typeof sectionStore.getAll>
   >([]);
@@ -153,6 +171,7 @@ function ProductionPlanningBoard() {
     setLines(productionLineStore.getAll());
     setOrders(orderBookStore.getAll());
     setCompanies(companyStore.getAll());
+    setGroups(groupStore.getAll());
     setSections(sectionStore.getAll());
     setAssignments(productionPlanStore.getAll());
   };
@@ -171,6 +190,83 @@ function ProductionPlanningBoard() {
   }, []);
 
   useEffect(() => {
+    if (groups.length === 0) {
+      if (selectedGroupId) setSelectedGroupId("");
+      return;
+    }
+    const selectedCompany = companies.find(
+      (company) => company.id === selectedCompanyId,
+    );
+    if (
+      selectedCompany &&
+      groups.some((group) => group.id === selectedCompany.groupId)
+    ) {
+      if (selectedGroupId !== selectedCompany.groupId) {
+        setSelectedGroupId(selectedCompany.groupId);
+      }
+      return;
+    }
+    if (groups.some((group) => group.id === selectedGroupId)) return;
+    const stored =
+      typeof window === "undefined"
+        ? ""
+        : window.localStorage.getItem(PLANNING_GROUP_KEY) || "";
+    setSelectedGroupId(
+      groups.some((group) => group.id === stored) ? stored : groups[0].id,
+    );
+  }, [groups, companies, selectedCompanyId, selectedGroupId]);
+
+  useEffect(() => {
+    if (!selectedGroupId || typeof window === "undefined") return;
+    window.localStorage.setItem(PLANNING_GROUP_KEY, selectedGroupId);
+  }, [selectedGroupId]);
+
+  const groupCompanies = useMemo(
+    () => companies.filter((company) => company.groupId === selectedGroupId),
+    [companies, selectedGroupId],
+  );
+
+  useEffect(() => {
+    if (groupCompanies.length === 0) {
+      if (selectedCompanyId) {
+        const belongs = companies.some(
+          (company) =>
+            company.id === selectedCompanyId &&
+            company.groupId === selectedGroupId,
+        );
+        if (!belongs) setSelectedCompanyId("");
+      }
+      return;
+    }
+    if (groupCompanies.some((company) => company.id === selectedCompanyId)) {
+      return;
+    }
+    const stored =
+      typeof window === "undefined"
+        ? ""
+        : window.localStorage.getItem(PLANNING_COMPANY_KEY) || "";
+    setSelectedCompanyId(
+      groupCompanies.some((company) => company.id === stored)
+        ? stored
+        : groupCompanies[0].id,
+    );
+  }, [groupCompanies, companies, selectedCompanyId, selectedGroupId]);
+
+  useEffect(() => {
+    if (!selectedCompanyId || typeof window === "undefined") return;
+    window.localStorage.setItem(PLANNING_COMPANY_KEY, selectedCompanyId);
+  }, [selectedCompanyId]);
+
+  useEffect(() => {
+    setSelectedLineId(null);
+    setSelectedOrderId(null);
+    setSelectedAssignmentId(null);
+    setSelectedDays([]);
+    setLineQuery("");
+    setOrderQuery("");
+  }, [selectedCompanyId]);
+
+  useEffect(() => {
     if (selectedDays.length === 0 && selectedAssignmentId) {
       setSelectedAssignmentId(null);
     }
@@ -182,9 +278,33 @@ function ProductionPlanningBoard() {
   const sectionName = (sectionId: string) =>
     sections.find((section) => section.id === sectionId)?.name || "Unavailable";
 
+  const selectedCompany =
+    companies.find((company) => company.id === selectedCompanyId) || null;
+  const selectedGroup =
+    groups.find((group) => group.id === selectedGroupId) || null;
+
+  const handleGroupChange = (groupId: string) => {
+    setSelectedGroupId(groupId);
+    const nextCompanies = companies.filter(
+      (company) => company.groupId === groupId,
+    );
+    setSelectedCompanyId(nextCompanies[0]?.id || "");
+  };
+
+  const companyLines = useMemo(
+    () => lines.filter((line) => line.companyId === selectedCompanyId),
+    [lines, selectedCompanyId],
+  );
+
+  const companyOrders = useMemo(
+    () => orders.filter((order) => order.companyId === selectedCompanyId),
+    [orders, selectedCompanyId],
+  );
+
   const jobs = useMemo(
-    () => buildPlannedJobs(assignments, orders, lines, skipSettings),
-    [assignments, orders, lines, skipSettings],
+    () =>
+      buildPlannedJobs(assignments, companyOrders, companyLines, skipSettings),
+    [assignments, companyOrders, companyLines, skipSettings],
   );
 
   const jobsByOrderId = useMemo(() => {
@@ -223,8 +343,8 @@ function ProductionPlanningBoard() {
 
   const filteredLines = useMemo(() => {
     const query = lineQuery.trim().toLowerCase();
-    if (!query) return lines;
-    return lines.filter((line) => {
+    if (!query) return companyLines;
+    return companyLines.filter((line) => {
       const haystack = [
         line.name,
         line.code,
@@ -236,11 +356,11 @@ function ProductionPlanningBoard() {
         .toLowerCase();
       return haystack.includes(query);
     });
-  }, [lines, lineQuery, companies, sections]);
+  }, [companyLines, lineQuery, companies, sections]);
 
   const filteredOrders = useMemo(() => {
     const query = orderQuery.trim().toLowerCase();
-    return orders.filter((order) => {
+    return companyOrders.filter((order) => {
       if (orderFilter === "unassigned" && jobsByOrderId.has(order.id)) {
         return false;
       }
@@ -263,7 +383,7 @@ function ProductionPlanningBoard() {
         .toLowerCase();
       return haystack.includes(query);
     });
-  }, [orders, orderQuery, orderFilter, companies, jobsByOrderId]);
+  }, [companyOrders, orderQuery, orderFilter, companies, jobsByOrderId]);
 
   const selectedHolidays = config
     ? config.holidays.filter((holiday) => holiday.date === selectedDate)
@@ -379,6 +499,16 @@ function ProductionPlanningBoard() {
       showErrorAlert("Missing record", "The order or production line was not found.");
       return;
     }
+    if (
+      sourceJob.order.companyId !== destLine.companyId ||
+      destLine.companyId !== selectedCompanyId
+    ) {
+      showErrorAlert(
+        "Different company",
+        "Orders can only be moved onto production lines from the selected company.",
+      );
+      return;
+    }
     const sameLine = sourceJob.line.id === destLineId;
     const destOutput = Number(destLine.targetOutput) || 0;
     if (destOutput <= 0) {
@@ -491,6 +621,13 @@ function ProductionPlanningBoard() {
     const line = lines.find((item) => item.id === lineId);
     if (!order || !line) {
       showErrorAlert("Missing record", "The order or production line was not found.");
+      return;
+    }
+    if (order.companyId !== line.companyId || line.companyId !== selectedCompanyId) {
+      showErrorAlert(
+        "Different company",
+        "Orders can only be planned on production lines from the selected company.",
+      );
       return;
     }
     if (BLOCKED_PLAN_STATUSES.has(order.status)) {
@@ -688,7 +825,131 @@ function ProductionPlanningBoard() {
     <DefaultLayout>
       <Breadcrumb pageName="Production Planning Board" />
 
-      <div className="mt-4 grid grid-cols-1 gap-2 xl:grid-cols-[240px_minmax(0,1fr)_250px] 2xl:grid-cols-[260px_minmax(0,1fr)_270px]">
+      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className="flex flex-col gap-3 rounded-2xl border border-stroke bg-white px-4 py-3 shadow-sm dark:border-strokedark dark:bg-boxdark">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Network className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-bodydark2">
+                Group
+              </p>
+              <p className="truncate text-sm font-bold text-black dark:text-white">
+                {selectedGroup
+                  ? `${selectedGroup.name} (${selectedGroup.code})`
+                  : groups.length === 0
+                    ? "No groups available"
+                    : "Select a group"}
+              </p>
+              <p className="truncate text-xs text-bodydark2">
+                {selectedGroup
+                  ? `${groupCompanies.length} compan${groupCompanies.length === 1 ? "y" : "ies"} in this group`
+                  : "Choose a group first"}
+              </p>
+            </div>
+          </div>
+          {groups.length === 0 ? (
+            <Link
+              href="/manage/add-group"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white"
+            >
+              Add group
+            </Link>
+          ) : (
+            <div className="relative">
+              <select
+                value={selectedGroupId}
+                onChange={(event) => handleGroupChange(event.target.value)}
+                className="w-full cursor-pointer appearance-none rounded-lg border-[1.5px] border-stroke bg-transparent py-2.5 pl-4 pr-11 text-sm font-semibold text-black outline-none focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                aria-label="Select group"
+              >
+                {!groups.some((group) => group.id === selectedGroupId) ? (
+                  <option value={selectedGroupId} disabled>
+                    Select a group
+                  </option>
+                ) : null}
+                {groups.map((group) => (
+                  <option key={group.id} value={group.id}>
+                    {group.name} ({group.code})
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-bodydark2" />
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-2xl border border-stroke bg-white px-4 py-3 shadow-sm dark:border-strokedark dark:bg-boxdark">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Building2 className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-bodydark2">
+                Company
+              </p>
+              <p className="truncate text-sm font-bold text-black dark:text-white">
+                {selectedCompany
+                  ? `${selectedCompany.name} (${selectedCompany.code})`
+                  : groupCompanies.length === 0
+                    ? "No companies in this group"
+                    : "Select a company"}
+              </p>
+              <p className="truncate text-xs text-bodydark2">
+                {selectedCompany
+                  ? `${selectedCompany.location || "No location"} · ${companyLines.length} line${companyLines.length === 1 ? "" : "s"} · ${companyOrders.length} order${companyOrders.length === 1 ? "" : "s"}`
+                  : "Lines and orders load for the selected factory"}
+              </p>
+            </div>
+          </div>
+          {groupCompanies.length === 0 ? (
+            <Link
+              href="/manage/add-company"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white"
+            >
+              Add company
+            </Link>
+          ) : (
+            <div className="relative">
+              <select
+                value={selectedCompanyId}
+                onChange={(event) => setSelectedCompanyId(event.target.value)}
+                className="w-full cursor-pointer appearance-none rounded-lg border-[1.5px] border-stroke bg-transparent py-2.5 pl-4 pr-11 text-sm font-semibold text-black outline-none focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                aria-label="Select company"
+              >
+                {!groupCompanies.some(
+                  (company) => company.id === selectedCompanyId,
+                ) ? (
+                  <option value={selectedCompanyId} disabled>
+                    Select a company
+                  </option>
+                ) : null}
+                {groupCompanies.map((company) => (
+                  <option key={company.id} value={company.id}>
+                    {company.name} ({company.code})
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-bodydark2" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {!selectedCompanyId ? (
+        <p className="mt-4 rounded-2xl border border-dashed border-stroke px-4 py-10 text-center text-sm text-bodydark2 dark:border-strokedark">
+          {groups.length === 0
+            ? "Add a group first, then add a company to plan production."
+            : groupCompanies.length === 0
+              ? "This group has no companies. Add a company, then open its planning board."
+              : "Select a company to open its planning board."}
+        </p>
+      ) : (
+        <div
+          key={selectedCompanyId}
+          className="mt-4 grid grid-cols-1 gap-2 xl:grid-cols-[240px_minmax(0,1fr)_250px] 2xl:grid-cols-[260px_minmax(0,1fr)_270px]"
+        >
         <aside className="flex flex-col overflow-hidden rounded-2xl border border-stroke bg-white shadow-sm dark:border-strokedark dark:bg-boxdark xl:h-0 xl:min-h-full">
           <div className="shrink-0 border-b border-stroke px-4 py-4 dark:border-strokedark">
             <div className="mb-3 flex items-center gap-2">
@@ -701,7 +962,7 @@ function ProductionPlanningBoard() {
                 </h2>
                 <p className="text-xs text-bodydark2">
                   {filteredLines.length} line
-                  {filteredLines.length === 1 ? "" : "s"} · drop orders here
+                  {filteredLines.length === 1 ? "" : "s"} · {selectedCompany?.code || "company"}
                 </p>
               </div>
             </div>
@@ -719,14 +980,14 @@ function ProductionPlanningBoard() {
           <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
             {filteredLines.length === 0 ? (
               <p className="rounded-xl border border-dashed border-stroke px-3 py-8 text-center text-sm text-bodydark2 dark:border-strokedark">
-                No production lines found.
+                No production lines for this company.
               </p>
             ) : (
               filteredLines.map((line) => {
                 const active = selectedLineId === line.id;
                 const lineColor = colorForLine(
                   line.id,
-                  lines.findIndex((item) => item.id === line.id),
+                  companyLines.findIndex((item) => item.id === line.id),
                 );
                 const lineJobs = jobsByLineId.get(line.id) || [];
                 const dailyOutput = Number(line.targetOutput) || 0;
@@ -835,9 +1096,9 @@ function ProductionPlanningBoard() {
               <p className="text-xs text-bodydark2">
                 {draggingOrderId || draggingDays
                   ? "Drop on a date box to start from that day, including on the same line, or on a line name to queue"
-                  : `${config.name} · selected ${selectedDate}${
+                  : `${selectedCompany?.name || "Company"} · ${config.name} · ${selectedDate}${
                       selectedLineId
-                        ? ` · ${lines.find((line) => line.id === selectedLineId)?.name || "line"}`
+                        ? ` · ${companyLines.find((line) => line.id === selectedLineId)?.name || "line"}`
                         : ""
                     }`}
               </p>
@@ -1064,7 +1325,7 @@ function ProductionPlanningBoard() {
                 </h2>
                 <p className="text-xs text-bodydark2">
                   {filteredOrders.length} order
-                  {filteredOrders.length === 1 ? "" : "s"} · drag to a date box
+                  {filteredOrders.length === 1 ? "" : "s"} · {selectedCompany?.code || "company"}
                 </p>
               </div>
             </div>
@@ -1106,7 +1367,7 @@ function ProductionPlanningBoard() {
           >
             {filteredOrders.length === 0 ? (
               <p className="rounded-xl border border-dashed border-stroke px-3 py-8 text-center text-sm text-bodydark2 dark:border-strokedark">
-                No orders found.
+                No orders for this company.
               </p>
             ) : (
               filteredOrders.map((order) => {
@@ -1118,7 +1379,7 @@ function ProductionPlanningBoard() {
                   planned?.color ||
                   colorForOrder(
                     order.id,
-                    orders.findIndex((item) => item.id === order.id),
+                    companyOrders.findIndex((item) => item.id === order.id),
                   );
                 return (
                   <div
@@ -1206,7 +1467,8 @@ function ProductionPlanningBoard() {
             )}
           </div>
         </aside>
-      </div>
+        </div>
+      )}
     </DefaultLayout>
   );
 }
