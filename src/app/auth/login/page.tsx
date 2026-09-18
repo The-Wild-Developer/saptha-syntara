@@ -3,10 +3,9 @@
 import React, { useState } from "react";
 import type { ILoginData } from "@/types";
 import { useRouter } from "next/navigation";
-import { postLoginRequest, postRequest } from "@/services/api.service";
-import { getSessionData, setSessionData } from "@/utils/session";
+import { dummyLeftMenu, dummyLogin } from "@/services/dummyAuth";
+import { setSessionData } from "@/utils/session";
 import { showSuccessAlert, showErrorAlert } from "@/utils/alert";
-import { LOGIN, PAGES } from "@/utils/apiMessage";
 import { Eye, EyeOff } from "lucide-react";
 import AuthPageShell from "@/components/auth/AuthPageShell";
 
@@ -33,13 +32,9 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await postRequest(
-        "api/v1/login/login",
-        {
-          password: loginData.password,
-        },
-        LOGIN,
-        loginData?.username,
+      const response = await dummyLogin(
+        loginData.username,
+        loginData.password,
       );
 
       if (response?.success) {
@@ -50,14 +45,7 @@ export default function Login() {
         );
         setSessionData("userProfile", response?.data?.profileDetails);
 
-        const token = getSessionData("accessToken") || "";
-        const authResponse = await postLoginRequest(
-          "api/v1/login/left-menu",
-          {},
-          PAGES,
-          token,
-          loginData?.username,
-        );
+        const authResponse = await dummyLeftMenu();
 
         if (authResponse?.success) {
           setSessionData("pages", authResponse.data);
@@ -71,24 +59,6 @@ export default function Login() {
             });
           });
         }
-      } else if (
-        (response?.success == false && response?.errorCode == 1004) ||
-        response?.errorCode == 1003
-      ) {
-        showErrorAlert(
-          "Login Failed",
-          response?.message || "Something went wrong!",
-          "Reset Password",
-          `/auth/resetPassword?username=${encodeURIComponent(loginData.username)}`,
-        );
-      } else if (
-        (response?.success == false && response?.errorCode == 1006) ||
-        response?.errorCode == 1005
-      ) {
-        showErrorAlert(
-          "Login Failed",
-          response?.message || "Something went wrong!",
-        );
       } else {
         showErrorAlert(
           "Login Failed",

@@ -136,26 +136,13 @@ function arcPath(
   return `M ${start.x} ${start.y} A ${r} ${r} 0 ${large} 0 ${end.x} ${end.y}`;
 }
 
-function smoothLine(points: { x: number; y: number }[]) {
+function linePath(points: { x: number; y: number }[]) {
   if (points.length === 0) return "";
-  if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
-  if (points.length === 2) {
-    return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
-  }
-
-  let d = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 0; i < points.length - 1; i += 1) {
-    const p0 = points[i - 1] || points[i];
-    const p1 = points[i];
-    const p2 = points[i + 1];
-    const p3 = points[i + 2] || p2;
-    const cp1x = p1.x + (p2.x - p0.x) / 6;
-    const cp1y = p1.y + (p2.y - p0.y) / 6;
-    const cp2x = p2.x - (p3.x - p1.x) / 6;
-    const cp2y = p2.y - (p3.y - p1.y) / 6;
-    d += ` C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
-  }
-  return d;
+  return points
+    .map((point, index) =>
+      `${index === 0 ? "M" : "L"} ${point.x.toFixed(3)} ${point.y.toFixed(3)}`,
+    )
+    .join(" ");
 }
 
 function ChartShell({
@@ -255,8 +242,6 @@ export function VolumeTrendChart({
 }) {
   const uid = useId().replace(/:/g, "");
   const fillId = `volume-fill-${uid}`;
-  const strokeId = `volume-stroke-${uid}`;
-  const glowId = `volume-glow-${uid}`;
   const [active, setActive] = useState<number | null>(null);
 
   const empty = data.every((value) => value === 0);
@@ -278,7 +263,7 @@ export function VolumeTrendChart({
     const y = height - (value / max) * (height - 8) - 4;
     return { x, y, value, label: labels[index] || "" };
   });
-  const line = smoothLine(points);
+  const line = linePath(points);
   const area =
     points.length === 0
       ? ""
@@ -344,22 +329,9 @@ export function VolumeTrendChart({
             >
               <defs>
                 <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.55" />
-                  <stop offset="55%" stopColor="#0EA5E9" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="#0284C7" stopOpacity="0.02" />
+                  <stop offset="0%" stopColor="#0EA5E9" stopOpacity="0.28" />
+                  <stop offset="100%" stopColor="#0EA5E9" stopOpacity="0.02" />
                 </linearGradient>
-                <linearGradient id={strokeId} x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#38BDF8" />
-                  <stop offset="55%" stopColor="#0EA5E9" />
-                  <stop offset="100%" stopColor="#2563EB" />
-                </linearGradient>
-                <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="1.4" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
               </defs>
               {[0.25, 0.5, 0.75].map((ratio) => (
                 <line
@@ -378,30 +350,20 @@ export function VolumeTrendChart({
                 x2={width}
                 y1={avgY}
                 y2={avgY}
-                stroke="#38BDF8"
+                stroke="#0EA5E9"
                 strokeWidth="0.45"
                 strokeDasharray="1.8 1.8"
-                opacity="0.7"
+                opacity="0.45"
               />
-              <motion.path
-                d={area}
-                fill={`url(#${fillId})`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.7, delay: 0.15 }}
-              />
-              <motion.path
+              <path d={area} fill={`url(#${fillId})`} />
+              <path
                 d={line}
                 fill="none"
-                stroke={`url(#${strokeId})`}
-                strokeWidth="2.1"
+                stroke="#0EA5E9"
+                strokeWidth="2.4"
                 strokeLinejoin="round"
                 strokeLinecap="round"
-                filter={`url(#${glowId})`}
                 vectorEffect="non-scaling-stroke"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1.1, ease: "easeOut" }}
               />
               {hover ? (
                 <line
@@ -431,10 +393,10 @@ export function VolumeTrendChart({
                   }}
                 >
                   {isPeak ? (
-                    <span className="chart-pulse-dot absolute inset-0 rounded-full bg-sky-400" />
+                    <span className="chart-pulse-dot absolute inset-0 rounded-full bg-primary" />
                   ) : null}
                   <span
-                    className={`absolute left-1/2 top-1/2 block -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-sky-500 bg-white shadow-sm transition-all ${
+                    className={`absolute left-1/2 top-1/2 block -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary bg-white shadow-sm transition-all ${
                       isActive || isPeak ? "h-3 w-3" : "h-2.5 w-2.5"
                     }`}
                   />

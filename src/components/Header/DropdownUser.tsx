@@ -5,9 +5,8 @@ import { clearSession, getSessionData } from "@/utils/session";
 import { IUserProfile } from "@/types";
 import ClickOutside from "@/components/ClickOutside";
 import { showErrorAlert, showSuccessAlert } from "@/utils/alert";
-import { postLoginRequest } from "@/services/api.service";
+import { dummyLogout } from "@/services/dummyAuth";
 import { useRouter } from "next/navigation";
-import { LOGOUT } from "@/utils/apiMessage";
 import { User } from "lucide-react";
 
 const DropdownUser = () => {
@@ -22,15 +21,7 @@ const DropdownUser = () => {
     setError(null);
 
     try {
-      const token = getSessionData("accessToken") || "";
-      const userProfile = getSessionData("userProfile");
-      const response = await postLoginRequest(
-        "api/v1/login/logout",
-        {},
-        LOGOUT,
-        token,
-        userProfile.username,
-      );
+      const response = await dummyLogout();
       if (response?.success) {
         // Clear session storage after logout
         clearSession();
@@ -61,9 +52,6 @@ const DropdownUser = () => {
         const details = await getSessionData("userProfile");
         if (details) {
           setUserProfile(details);
-          setProfileImage(
-            details?.profileImg.doc || "/images/user/profile.png",
-          );
         }
       } catch (error) {
         console.error("Error fetching session data:", error);
@@ -188,6 +176,3 @@ const DropdownUser = () => {
 };
 
 export default DropdownUser;
-function setProfileImage(arg0: any) {
-  throw new Error("Function not implemented.");
-}

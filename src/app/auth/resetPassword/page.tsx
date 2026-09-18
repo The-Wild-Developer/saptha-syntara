@@ -2,10 +2,9 @@
 
 import React, { Suspense, useState } from "react";
 import type { IResetPassword } from "@/types";
-import { postRequest } from "@/services/api.service";
+import { dummyResetPassword } from "@/services/dummyAuth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { showSuccessAlert, showErrorAlert } from "@/utils/alert";
-import { RESETPASSWORD } from "@/utils/apiMessage";
 import { Eye, EyeOff } from "lucide-react";
 import AuthPageShell from "@/components/auth/AuthPageShell";
 
@@ -52,15 +51,10 @@ function ResetPassword() {
     setLoading(true);
 
     try {
-      const response = await postRequest(
-        "api/v1/password/reset",
-        {
-          username: resetPassword.username,
-          password: resetPassword.password,
-          confirmPassword: resetPassword.confirmPassword,
-        },
-        RESETPASSWORD,
+      const response = await dummyResetPassword(
         resetPassword.username,
+        resetPassword.password,
+        resetPassword.confirmPassword,
       );
       if (response.success) {
         showSuccessAlert("Reset Successful", "Redirecting to login...");

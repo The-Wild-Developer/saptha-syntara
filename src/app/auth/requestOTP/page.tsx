@@ -2,10 +2,9 @@
 
 import React, { useState } from "react";
 import type { IRequestPasswordOTP } from "@/types";
-import { postRequest } from "@/services/api.service";
+import { dummyRequestOtp } from "@/services/dummyAuth";
 import { useRouter } from "next/navigation";
 import { showSuccessAlert, showErrorAlert } from "@/utils/alert";
-import { RESETPASSWORD } from "@/utils/apiMessage";
 import AuthPageShell from "@/components/auth/AuthPageShell";
 
 export default function RequestOTP() {
@@ -28,14 +27,7 @@ export default function RequestOTP() {
     setLoading(true);
 
     try {
-      const response = await postRequest(
-        "api/v1/password/sent-otp",
-        {
-          username: requestOTP.username,
-        },
-        RESETPASSWORD,
-        requestOTP.username,
-      );
+      const response = await dummyRequestOtp(requestOTP.username);
       if (response.success) {
         showSuccessAlert(
           "OTP Sent Successful",

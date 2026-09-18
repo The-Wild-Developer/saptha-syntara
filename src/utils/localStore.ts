@@ -760,6 +760,27 @@ export const planningSkipStore = {
 
 const DUMMY_PROJECT_SEED_KEY = "ss_dummy_project_v1";
 const DUMMY_EMPLOYEES_SEED_KEY = "ss_dummy_employees_v1";
+const DUMMY_ORDER_TREND_DATES: Record<string, string> = {
+  "PO-26001": "2026-04-12",
+  "PO-26002": "2026-05-08",
+  "PO-26003": "2026-05-22",
+  "PO-26004": "2026-06-14",
+  "PO-26005": "2026-06-26",
+  "PO-26006": "2026-07-11",
+  "PO-26007": "2026-07-24",
+  "PO-26008": "2026-08-09",
+  "PO-26009": "2026-08-21",
+  "PO-26010": "2026-09-05",
+};
+
+function patchDummyOrderTrendDates() {
+  orderBookStore.getAll().forEach((order) => {
+    const orderDate = DUMMY_ORDER_TREND_DATES[order.orderNo];
+    if (orderDate && order.orderDate !== orderDate) {
+      orderBookStore.update(order.id, { orderDate });
+    }
+  });
+}
 
 const DUMMY_EMPLOYEE_DATA: Omit<Employee, "id" | "createdAt" | "companyId">[] = [
   {
@@ -1296,7 +1317,10 @@ function sizeQty(
  */
 export function seedDummyProjectData() {
   if (typeof window === "undefined") return;
-  if (window.localStorage.getItem(DUMMY_PROJECT_SEED_KEY)) return;
+  if (window.localStorage.getItem(DUMMY_PROJECT_SEED_KEY)) {
+    patchDummyOrderTrendDates();
+    return;
+  }
 
   const apparelGroup = ensureByCode(groupStore.getAll(), "SAG01", () =>
     groupStore.add({
@@ -1512,7 +1536,7 @@ export function seedDummyProjectData() {
       color: "White",
       sizeRange: "XS-XXL",
       ...sizeQty(400, 1200, 1800, 1600, 800, 200),
-      orderDate: "2026-08-01",
+      orderDate: DUMMY_ORDER_TREND_DATES["PO-26001"],
       deliveryDate: "2026-09-18",
       merchandiser: "Malsha Ekanayake",
       status: "Confirmed",
@@ -1530,7 +1554,7 @@ export function seedDummyProjectData() {
       color: "Navy",
       sizeRange: "S-XXL",
       ...sizeQty(0, 800, 1400, 1400, 700, 100),
-      orderDate: "2026-08-05",
+      orderDate: DUMMY_ORDER_TREND_DATES["PO-26002"],
       deliveryDate: "2026-09-22",
       merchandiser: "Malsha Ekanayake",
       status: "In Cutting",
@@ -1548,7 +1572,7 @@ export function seedDummyProjectData() {
       color: "Black",
       sizeRange: "S-XXL",
       ...sizeQty(0, 500, 1100, 1200, 600, 200),
-      orderDate: "2026-07-20",
+      orderDate: DUMMY_ORDER_TREND_DATES["PO-26003"],
       deliveryDate: "2026-09-25",
       merchandiser: "Chathura Bandara",
       status: "In Sewing",
@@ -1566,7 +1590,7 @@ export function seedDummyProjectData() {
       color: "Sky Blue",
       sizeRange: "2-12",
       ...sizeQty(200, 700, 900, 700, 300, 0),
-      orderDate: "2026-08-12",
+      orderDate: DUMMY_ORDER_TREND_DATES["PO-26004"],
       deliveryDate: "2026-09-12",
       merchandiser: "Gayan Fernando",
       status: "In Finishing",
@@ -1584,7 +1608,7 @@ export function seedDummyProjectData() {
       color: "Light Blue",
       sizeRange: "S-XXL",
       ...sizeQty(0, 400, 900, 900, 400, 100),
-      orderDate: "2026-07-28",
+      orderDate: DUMMY_ORDER_TREND_DATES["PO-26005"],
       deliveryDate: "2026-09-28",
       merchandiser: "Asela Cooray",
       status: "Packed",
@@ -1602,7 +1626,7 @@ export function seedDummyProjectData() {
       color: "Graphite",
       sizeRange: "XS-XL",
       ...sizeQty(300, 900, 1200, 1000, 400, 0),
-      orderDate: "2026-08-18",
+      orderDate: DUMMY_ORDER_TREND_DATES["PO-26006"],
       deliveryDate: "2026-10-05",
       merchandiser: "Malsha Ekanayake",
       status: "Confirmed",
@@ -1620,7 +1644,7 @@ export function seedDummyProjectData() {
       color: "Coral Floral",
       sizeRange: "XS-XL",
       ...sizeQty(150, 500, 700, 550, 200, 0),
-      orderDate: "2026-08-08",
+      orderDate: DUMMY_ORDER_TREND_DATES["PO-26007"],
       deliveryDate: "2026-09-30",
       merchandiser: "Asela Cooray",
       status: "On Hold",
@@ -1638,7 +1662,7 @@ export function seedDummyProjectData() {
       color: "Forest Green",
       sizeRange: "S-XXL",
       ...sizeQty(0, 600, 1100, 1100, 500, 150),
-      orderDate: "2026-08-21",
+      orderDate: DUMMY_ORDER_TREND_DATES["PO-26008"],
       deliveryDate: "2026-10-10",
       merchandiser: "Malsha Ekanayake",
       status: "Confirmed",
@@ -1656,7 +1680,7 @@ export function seedDummyProjectData() {
       color: "Heather Grey",
       sizeRange: "S-XL",
       ...sizeQty(0, 1000, 1600, 1400, 600, 0),
-      orderDate: "2026-08-10",
+      orderDate: DUMMY_ORDER_TREND_DATES["PO-26009"],
       deliveryDate: "2026-09-15",
       merchandiser: "Gayan Fernando",
       status: "In Sewing",
@@ -1674,7 +1698,7 @@ export function seedDummyProjectData() {
       color: "Burgundy",
       sizeRange: "S-XXL",
       ...sizeQty(0, 700, 1300, 1300, 700, 200),
-      orderDate: "2026-08-25",
+      orderDate: DUMMY_ORDER_TREND_DATES["PO-26010"],
       deliveryDate: "2026-10-20",
       merchandiser: "Gayan Fernando",
       status: "Confirmed",
@@ -1686,6 +1710,7 @@ export function seedDummyProjectData() {
     const exists = orderBookStore.getAll().some((item) => item.orderNo === order.orderNo);
     if (!exists) orderBookStore.add(order);
   });
+  patchDummyOrderTrendDates();
 
   window.localStorage.setItem(DUMMY_PROJECT_SEED_KEY, "1");
   window.localStorage.setItem(DUMMY_EMPLOYEES_SEED_KEY, "1");

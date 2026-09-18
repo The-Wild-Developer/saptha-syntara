@@ -1,10 +1,9 @@
 "use client";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import { RESETPASSWORD } from "@/utils/apiMessage";
 import React, { useState, useEffect } from "react";
 import type { IResetPassword, IUserProfile } from "@/types";
-import { postRequest } from "@/services/api.service";
+import { dummyResetPassword } from "@/services/dummyAuth";
 import { getSessionData } from "@/utils/session";
 import { showSuccessAlert, showErrorAlert } from "@/utils/alert";
 
@@ -61,14 +60,10 @@ const Settings = () => {
 
     try {
       const userProfile = getSessionData("userProfile");
-      const response = await postRequest(
-        "/api/v1/password/reset",
-        {
-          password: resetPassword.password,
-          confirmPassword: resetPassword.confirmPassword,
-        },
-        RESETPASSWORD,
+      const response = await dummyResetPassword(
         userProfile?.username,
+        resetPassword.password,
+        resetPassword.confirmPassword,
       );
       if (response.success) {
         showSuccessAlert(
