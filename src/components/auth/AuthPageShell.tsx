@@ -147,7 +147,7 @@ export default function AuthPageShell({
         <div className="login-stack">
           <div className="login-animate-bounce-in login-header text-center">
             <img
-              src="/saptha-syntara/images/logo/logo.png"
+              src="/images/logo/logo.png"
               alt="Saptha Syntara"
               className="login-logo mx-auto object-contain"
             />

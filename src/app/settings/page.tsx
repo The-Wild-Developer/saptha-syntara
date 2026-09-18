@@ -101,7 +101,7 @@ const Settings = () => {
         <div className="grid grid-cols-12 gap-8 xl:h-full xl:items-stretch">
           <div className="col-span-12 md:col-span-6 flex h-full flex-col lg:col-span-6">
             <div className="h-full rounded-2xl border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
-              <div className="flex items-center border-b text-black dark:text-white border-stroke px-7 py-4 dark:border-strokedark">
+              <div className="flex items-center border-b text-primary border-stroke px-7 py-4 dark:border-strokedark">
                 <Shield className="h-6 w-6" />
                 <span className="ms-1 flex-1 whitespace-nowrap text-start font-medium">
                   Reset Password
@@ -213,7 +213,7 @@ const Settings = () => {
           </div>
           <div className="relative col-span-12 md:col-span-6 flex h-full flex-col overflow-hidden lg:col-span-6">
             <div className="h-full rounded-2xl border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="flex items-center border-b border-stroke text-black dark:text-white px-7 py-4 dark:border-strokedark">
+              <div className="flex items-center border-b border-stroke text-primary px-7 py-4 dark:border-strokedark">
                 <Info className="h-6 w-6" />
                 <span className="ms-1 flex-1 whitespace-nowrap text-start font-medium">
                   About Password

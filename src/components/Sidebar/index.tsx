@@ -212,7 +212,7 @@ const Sidebar = ({
                   ? "lg:pointer-events-none lg:absolute lg:scale-75 lg:opacity-0"
                   : "opacity-100"
                   }`}
-                src="/saptha-syntara/images/logo/logo.png"
+                src="/images/logo/logo.png"
                 alt="Logo"
               />
               <img
@@ -220,7 +220,7 @@ const Sidebar = ({
                   ? "hidden w-9 opacity-100 lg:block"
                   : "pointer-events-none hidden w-9 scale-75 opacity-0 lg:block"
                   }`}
-                src="/saptha-syntara/images/logo/favicon.png"
+                src="/images/logo/favicon.png"
                 alt="Logo"
               />
             </div>
@@ -287,7 +287,7 @@ const Sidebar = ({
             </span>
             <img
               className="ml-1 w-30"
-              src="/saptha-syntara/images/logo/logo.png"
+              src="/images/logo/logo.png"
               alt="Company Logo"
             />
           </div>

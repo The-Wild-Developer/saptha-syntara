@@ -70,7 +70,7 @@ const Header = (props: {
           <Link className="block flex-shrink-0 lg:hidden" href="/dashboard">
             <img
               className="w-9"
-              src="/saptha-syntara/images/logo/favicon.png"
+              src="/images/logo/favicon.png"
               alt="Logo"
             />
           </Link>

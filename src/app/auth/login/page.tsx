@@ -79,7 +79,7 @@ export default function Login() {
           "Login Failed",
           response?.message || "Something went wrong!",
           "Reset Password",
-          `/saptha-syntara/auth/resetPassword?username=${encodeURIComponent(loginData.username)}`,
+          `/auth/resetPassword?username=${encodeURIComponent(loginData.username)}`,
         );
       } else if (
         (response?.success == false && response?.errorCode == 1006) ||
@@ -251,7 +251,7 @@ export default function Login() {
                   </span>
                 </label>
                 <a
-                  href="/saptha-syntara/auth/requestOTP"
+                  href="/auth/requestOTP"
                   className="text-sm font-semibold text-primary transition-colors duration-300 hover:text-hover"
                 >
                   Forgot password?
@@ -293,7 +293,7 @@ export default function Login() {
               <p className="text-sm text-blue-600">
                 Don&apos;t have an account?{" "}
                 <a
-                  href="/saptha-syntara"
+                  href="/"
                   className="bg-gradient-to-r from-hover to-primary bg-clip-text font-bold text-transparent"
                 >
                   Create one now

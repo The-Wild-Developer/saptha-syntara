@@ -132,7 +132,7 @@ export default function RequestOTP() {
           <p className="text-sm text-blue-600">
             Remember your password?{" "}
             <a
-              href="/saptha-syntara/auth/login"
+              href="/auth/login"
               className="bg-gradient-to-r from-hover to-primary bg-clip-text font-bold text-transparent"
             >
               Back to sign in

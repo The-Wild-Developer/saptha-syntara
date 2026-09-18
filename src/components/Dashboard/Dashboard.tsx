@@ -54,18 +54,18 @@ function getTimeGreeting() {
   const hour = new Date().getHours();
 
   if (hour < 12) {
-    return { greeting: "Morning", icon: "/saptha-syntara/images/morning.svg" };
+    return { greeting: "Morning", icon: "/images/morning.svg" };
   }
   if (hour < 15) {
     return {
       greeting: "Afternoon",
-      icon: "/saptha-syntara/images/afternoon.svg",
+      icon: "/images/afternoon.svg",
     };
   }
   if (hour < 19) {
-    return { greeting: "Evening", icon: "/saptha-syntara/images/evening-1.svg" };
+    return { greeting: "Evening", icon: "/images/evening-1.svg" };
   }
-  return { greeting: "Night", icon: "/saptha-syntara/images/evening-2.svg" };
+  return { greeting: "Night", icon: "/images/evening-2.svg" };
 }
 
 const PIPELINE_LOOK = {
@@ -1387,7 +1387,7 @@ function HeroArt() {
         </span>
       ) : (
         <img
-          src="/saptha-syntara/images/dashboard.png"
+          src="/images/dashboard.png"
           alt="Dashboard"
           onError={() => setFailed(true)}
           className="h-36 w-auto max-w-full object-contain sm:h-40 sm:object-right md:h-44 lg:h-52"

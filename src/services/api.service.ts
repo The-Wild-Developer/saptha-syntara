@@ -3,7 +3,7 @@ import { showErrorAlert } from "@/utils/alert";
 import { clearSession } from "@/utils/session";
 import axios from "axios";
 
-const MAINTENANCE_PATH = "/saptha-syntara/maintenance";
+const MAINTENANCE_PATH = "/maintenance";
 
 const isUnderMaintenance = (data: unknown): boolean => {
   if (data === null || typeof data !== "object" || data instanceof Blob) {
@@ -51,7 +51,7 @@ const createAxiosInstance = (baseURL: string, withCredentials = false) => {
           "Token has expired or is invalid",
           "Please log in again to continue.",
           "Login Again",
-          "/saptha-syntara/auth/login",
+          "/auth/login",
           false,
           "Cancel",
           () => {
@@ -107,7 +107,7 @@ const postRequest = async (
         "Token has expired or is invalid",
         "Please log in again to continue.",
         "Login Again",
-        "/saptha-syntara/auth/login",
+        "/auth/login",
         false,
         "Cancel",
         () => {
@@ -143,7 +143,7 @@ const postLoginRequest = async (
         "Token has expired or is invalid",
         "Please log in again to continue.",
         "Login Again",
-        "/saptha-syntara/auth/login",
+        "/auth/login",
         false,
         "Cancel",
         () => {
@@ -191,7 +191,7 @@ const fileDownload = async (
         "Token has expired or is invalid",
         "Please log in again to continue.",
         "Login Again",
-        "/saptha-syntara/auth/login",
+        "/auth/login",
         false,
         "Cancel",
         () => {

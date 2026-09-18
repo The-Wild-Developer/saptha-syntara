@@ -163,7 +163,7 @@ export default function Hero() {
 
       <div className="relative z-10 m-2 flex flex-col items-center justify-center text-center">
         <img
-          src="/saptha-syntara/images/logo/logo.png"
+          src="/images/logo/logo.png"
           alt="Saptha Syntara"
           className="login-animate-bounce-in h-12 w-auto object-contain md:h-20"
         />
